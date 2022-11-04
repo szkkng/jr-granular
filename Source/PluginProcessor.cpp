@@ -40,16 +40,23 @@ JRGranularAudioProcessor::JRGranularAudioProcessor()
     inputBuffers  = new RNBO::SampleValue* [coreObj.getNumInputChannels()];
     outputBuffers = new RNBO::SampleValue* [coreObj.getNumOutputChannels()];
 
-    for (int i = 0; i < coreObj.getNumInputChannels(); i++)
+    for (RNBO::Index i = 0; i < coreObj.getNumInputChannels(); i++)
         inputBuffers[i] = nullptr;
 
-    for (int i = 0; i < coreObj.getNumOutputChannels(); i++)
+    for (RNBO::Index i = 0; i < coreObj.getNumOutputChannels(); i++)
         outputBuffers[i] = nullptr;
 
-    for (int i = 0; i < coreObj.getNumParameters(); ++i)
+    for (RNBO::Index i = 0; i < coreObj.getNumParameters(); ++i)
     {
-        auto name = juce::String (coreObj.getParameterName (i));
-        apvts.addParameterListener (name, this);
+        RNBO::ParameterInfo info;
+		coreObj.getParameterInfo(i, &info);
+
+        if (info.visible)
+        {
+            auto name = juce::String (coreObj.getParameterName (i));
+            jassert (apvts.getParameter (name) != nullptr);
+            apvts.addParameterListener (name, this);
+        }
     }
 }
 
@@ -162,8 +169,11 @@ void JRGranularAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 {
     juce::ScopedNoDenormals noDenormals;
     auto bufferSize = buffer.getNumSamples();
+    auto rnboNumInputChannels  = coreObj.getNumInputChannels();
+    auto rnboNumOutputChannels = coreObj.getNumInputChannels();
 
-    for (int i = 0; i < coreObj.getNumInputChannels(); i++)
+    // Fill input buffers.
+    for (int i = 0; i < rnboNumInputChannels; i++)
     {
         if (i < getTotalNumInputChannels())
         {
@@ -177,14 +187,15 @@ void JRGranularAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     }
 
     coreObj.process (inputBuffers,
-                     coreObj.getNumInputChannels(),
+                     rnboNumInputChannels,
                      outputBuffers,
-                     coreObj.getNumOutputChannels(),
+                     rnboNumOutputChannels,
                      bufferSize);
 
+    // Fill output buffers.
     for (int i = 0; i < getTotalNumOutputChannels(); i++)
     {
-        if (i < coreObj.getNumOutputChannels())
+        if (i < rnboNumOutputChannels)
         {
             for (int j = 0; j < bufferSize; j++)
                 buffer.getWritePointer (i)[j] = outputBuffers[i][j];
