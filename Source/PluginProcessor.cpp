@@ -115,22 +115,25 @@ int JRGranularAudioProcessor::getCurrentProgram()
 
 void JRGranularAudioProcessor::setCurrentProgram (int index)
 {
+    juce::ignoreUnused (index);
 }
 
 const juce::String JRGranularAudioProcessor::getProgramName (int index)
 {
+    juce::ignoreUnused (index);
     return {};
 }
 
 void JRGranularAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
+    juce::ignoreUnused (index, newName);
 }
 
 //==============================================================================
 void JRGranularAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     assureBufferSize (samplesPerBlock);
-    coreObj.prepareToProcess (sampleRate, samplesPerBlock);
+    coreObj.prepareToProcess (sampleRate, static_cast<size_t> (samplesPerBlock));
 }
 
 void JRGranularAudioProcessor::releaseResources()
@@ -167,17 +170,21 @@ bool JRGranularAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 
 void JRGranularAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    juce::ignoreUnused (midiMessages);
+
     juce::ScopedNoDenormals noDenormals;
-    auto bufferSize = buffer.getNumSamples();
-    auto rnboNumInputChannels  = coreObj.getNumInputChannels();
-    auto rnboNumOutputChannels = coreObj.getNumInputChannels();
+    auto bufferSize            = static_cast<size_t> (buffer.getNumSamples());
+    auto numInputChannels      = getTotalNumInputChannels();
+    auto numOutputChannels     = getTotalNumOutputChannels();
+    auto rnboNumInputChannels  = static_cast<int> (coreObj.getNumInputChannels());
+    auto rnboNumOutputChannels = static_cast<int> (coreObj.getNumInputChannels());
 
     // Fill input buffers.
     for (int i = 0; i < rnboNumInputChannels; i++)
     {
-        if (i < getTotalNumInputChannels())
+        if (i < numInputChannels)
         {
-            for (int j = 0; j < bufferSize; j++)
+            for (size_t j = 0; j < bufferSize; j++)
                 inputBuffers[i][j] = buffer.getReadPointer (i)[j];
         }
         else
@@ -187,22 +194,22 @@ void JRGranularAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     }
 
     coreObj.process (inputBuffers,
-                     rnboNumInputChannels,
+                     static_cast<RNBO::Index> (rnboNumInputChannels),
                      outputBuffers,
-                     rnboNumOutputChannels,
+                     static_cast<RNBO::Index> (rnboNumOutputChannels),
                      bufferSize);
 
     // Fill output buffers.
-    for (int i = 0; i < getTotalNumOutputChannels(); i++)
+    for (int i = 0; i < numOutputChannels; i++)
     {
         if (i < rnboNumOutputChannels)
         {
-            for (int j = 0; j < bufferSize; j++)
-                buffer.getWritePointer (i)[j] = outputBuffers[i][j];
+            for (size_t j = 0; j < bufferSize; j++)
+                buffer.getWritePointer (i)[j] = static_cast<float> (outputBuffers[i][j]);
         }
         else
         {
-            buffer.clear (i, 0, bufferSize);
+            buffer.clear (i, 0, static_cast<int> (bufferSize));
         }
     }
 }
@@ -228,7 +235,7 @@ void JRGranularAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 
 void JRGranularAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    auto tree = juce::ValueTree::readFromData (data, sizeInBytes);
+    auto tree = juce::ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes));
 
     if (tree.isValid())
         apvts.replaceState (tree);
@@ -244,18 +251,20 @@ void JRGranularAudioProcessor::assureBufferSize (int bufferSize)
 {
     if (bufferSize > currentBufferSize)
     {
-        for (int i = 0; i < coreObj.getNumInputChannels(); i++)
+        for (RNBO::Index i = 0; i < coreObj.getNumInputChannels(); i++)
         {
-            if (inputBuffers[i]) delete inputBuffers[i];
+            if (inputBuffers[i]) 
+                delete inputBuffers[i];
 
-            inputBuffers[i] = new RNBO::SampleValue[bufferSize];
+            inputBuffers[i] = new RNBO::SampleValue[static_cast<size_t> (bufferSize)];
         }
 
-        for (int i = 0; i < coreObj.getNumOutputChannels(); i++)
+        for (RNBO::Index i = 0; i < coreObj.getNumOutputChannels(); i++)
         {
-            if (outputBuffers[i]) delete outputBuffers[i];
+            if (outputBuffers[i]) 
+                delete outputBuffers[i];
 
-            outputBuffers[i] = new RNBO::SampleValue[bufferSize];
+            outputBuffers[i] = new RNBO::SampleValue[static_cast<size_t> (bufferSize)];
         }
 
         currentBufferSize = bufferSize;
