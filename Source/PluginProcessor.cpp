@@ -179,9 +179,11 @@ bool JRGranularAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 void JRGranularAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ignoreUnused (midiMessages);
-
     juce::ScopedNoDenormals noDenormals;
-    auto bufferSize            = static_cast<size_t> (buffer.getNumSamples());
+
+    auto bufferSize = static_cast<size_t> (buffer.getNumSamples());
+    coreObj.prepareToProcess (getSampleRate(), bufferSize);
+
     auto numInputChannels      = getTotalNumInputChannels();
     auto numOutputChannels     = getTotalNumOutputChannels();
     auto rnboNumInputChannels  = static_cast<int> (coreObj.getNumInputChannels());
