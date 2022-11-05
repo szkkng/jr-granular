@@ -49,7 +49,7 @@ JRGranularAudioProcessor::JRGranularAudioProcessor()
     for (RNBO::Index i = 0; i < rnboObject.getNumParameters(); ++i)
     {
         RNBO::ParameterInfo info;
-		rnboObject.getParameterInfo(i, &info);
+        rnboObject.getParameterInfo(i, &info);
 
         if (info.visible)
         {
