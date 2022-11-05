@@ -79,7 +79,7 @@ private:
     juce::AudioProcessorValueTreeState apvts;
     juce::UndoManager undoManager;
 
-    RNBO::CoreObject coreObj;
+    RNBO::CoreObject rnboObject;
     RNBO::SampleValue** inputBuffers;
     RNBO::SampleValue** outputBuffers;
     

@@ -37,23 +37,23 @@ JRGranularAudioProcessor::JRGranularAudioProcessor()
 #endif
        apvts (*this, &undoManager, "Parameters", createParameterLayout())
 {
-    inputBuffers  = new RNBO::SampleValue* [coreObj.getNumInputChannels()];
-    outputBuffers = new RNBO::SampleValue* [coreObj.getNumOutputChannels()];
+    inputBuffers  = new RNBO::SampleValue* [rnboObject.getNumInputChannels()];
+    outputBuffers = new RNBO::SampleValue* [rnboObject.getNumOutputChannels()];
 
-    for (RNBO::Index i = 0; i < coreObj.getNumInputChannels(); i++)
+    for (RNBO::Index i = 0; i < rnboObject.getNumInputChannels(); i++)
         inputBuffers[i] = nullptr;
 
-    for (RNBO::Index i = 0; i < coreObj.getNumOutputChannels(); i++)
+    for (RNBO::Index i = 0; i < rnboObject.getNumOutputChannels(); i++)
         outputBuffers[i] = nullptr;
 
-    for (RNBO::Index i = 0; i < coreObj.getNumParameters(); ++i)
+    for (RNBO::Index i = 0; i < rnboObject.getNumParameters(); ++i)
     {
         RNBO::ParameterInfo info;
-		coreObj.getParameterInfo(i, &info);
+		rnboObject.getParameterInfo(i, &info);
 
         if (info.visible)
         {
-            auto name = juce::String (coreObj.getParameterName (i));
+            auto name = juce::String (rnboObject.getParameterName (i));
 
 	    // Each apvts parameter's name and range must be the same as the rnbo param object's.
 	    // If you hit this assertion then you need to fix the incorrect id in ParamIDs.h.
@@ -141,7 +141,7 @@ void JRGranularAudioProcessor::changeProgramName (int index, const juce::String&
 void JRGranularAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     assureBufferSize (samplesPerBlock);
-    coreObj.prepareToProcess (sampleRate, static_cast<size_t> (samplesPerBlock));
+    rnboObject.prepareToProcess (sampleRate, static_cast<size_t> (samplesPerBlock));
 }
 
 void JRGranularAudioProcessor::releaseResources()
@@ -182,12 +182,12 @@ void JRGranularAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     juce::ScopedNoDenormals noDenormals;
 
     auto bufferSize = static_cast<size_t> (buffer.getNumSamples());
-    coreObj.prepareToProcess (getSampleRate(), bufferSize);
+    rnboObject.prepareToProcess (getSampleRate(), bufferSize);
 
     auto numInputChannels      = getTotalNumInputChannels();
     auto numOutputChannels     = getTotalNumOutputChannels();
-    auto rnboNumInputChannels  = static_cast<int> (coreObj.getNumInputChannels());
-    auto rnboNumOutputChannels = static_cast<int> (coreObj.getNumInputChannels());
+    auto rnboNumInputChannels  = static_cast<int> (rnboObject.getNumInputChannels());
+    auto rnboNumOutputChannels = static_cast<int> (rnboObject.getNumInputChannels());
 
     // Fill input buffers.
     for (int i = 0; i < rnboNumInputChannels; i++)
@@ -203,11 +203,11 @@ void JRGranularAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         }
     }
 
-    coreObj.process (inputBuffers,
-                     static_cast<RNBO::Index> (rnboNumInputChannels),
-                     outputBuffers,
-                     static_cast<RNBO::Index> (rnboNumOutputChannels),
-                     bufferSize);
+    rnboObject.process (inputBuffers,
+                        static_cast<RNBO::Index> (rnboNumInputChannels),
+                        outputBuffers,
+                        static_cast<RNBO::Index> (rnboNumOutputChannels),
+                        bufferSize);
 
     // Fill output buffers.
     for (int i = 0; i < numOutputChannels; i++)
@@ -253,15 +253,15 @@ void JRGranularAudioProcessor::setStateInformation (const void* data, int sizeIn
 
 void JRGranularAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
-    coreObj.setParameterValue (coreObj.getParameterIndexForID (parameterID.toRawUTF8()),
-                               newValue);
+    rnboObject.setParameterValue (rnboObject.getParameterIndexForID (parameterID.toRawUTF8()),
+                                  newValue);
 }
 
 void JRGranularAudioProcessor::assureBufferSize (int bufferSize)
 {
     if (bufferSize > currentBufferSize)
     {
-        for (RNBO::Index i = 0; i < coreObj.getNumInputChannels(); i++)
+        for (RNBO::Index i = 0; i < rnboObject.getNumInputChannels(); i++)
         {
             if (inputBuffers[i]) 
                 delete inputBuffers[i];
@@ -269,7 +269,7 @@ void JRGranularAudioProcessor::assureBufferSize (int bufferSize)
             inputBuffers[i] = new RNBO::SampleValue[static_cast<size_t> (bufferSize)];
         }
 
-        for (RNBO::Index i = 0; i < coreObj.getNumOutputChannels(); i++)
+        for (RNBO::Index i = 0; i < rnboObject.getNumOutputChannels(); i++)
         {
             if (outputBuffers[i]) 
                 delete outputBuffers[i];
