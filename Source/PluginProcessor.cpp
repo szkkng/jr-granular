@@ -54,7 +54,15 @@ JRGranularAudioProcessor::JRGranularAudioProcessor()
         if (info.visible)
         {
             auto name = juce::String (coreObj.getParameterName (i));
-            jassert (apvts.getParameter (name) != nullptr);
+
+	    // Each apvts parameter's name and range must be the same as the rnbo param object's.
+	    // If you hit this assertion then you need to fix the incorrect id in ParamIDs.h.
+            jassert (apvts.getParameter (name) != nullptr);  
+
+	    // If you hit these assertions then you need to fix the incorrect apvts 
+	    // parameter range in createParameterLayout().
+	    jassert (info.min == apvts.getParameter (name)->getNormalisableRange().start);
+	    jassert (info.max == apvts.getParameter (name)->getNormalisableRange().end);
             apvts.addParameterListener (name, this);
         }
     }
