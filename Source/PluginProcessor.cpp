@@ -55,15 +55,20 @@ JRGranularAudioProcessor::JRGranularAudioProcessor()
         {
             auto name = juce::String (rnboObject.getParameterName (i));
 
-	    // Each apvts parameter's name and range must be the same as the rnbo param object's.
-	    // If you hit this assertion then you need to fix the incorrect id in ParamIDs.h.
+            // Each apvts parameter's name and range must be the same as the rnbo param object's.
+            // If you hit this assertion then you need to fix the incorrect id in ParamIDs.h.
             jassert (apvts.getParameter (name) != nullptr);  
 
-	    // If you hit these assertions then you need to fix the incorrect apvts 
-	    // parameter range in createParameterLayout().
-	    jassert (info.min == apvts.getParameter (name)->getNormalisableRange().start);
-	    jassert (info.max == apvts.getParameter (name)->getNormalisableRange().end);
+            // If you hit these assertions then you need to fix the incorrect apvts 
+            // parameter range in createParameterLayout().
+            jassert (info.min == apvts.getParameter (name)->getNormalisableRange().start);
+            jassert (info.max == apvts.getParameter (name)->getNormalisableRange().end);
+
+            auto juceParamIndex = apvts.getParameter (name)->getParameterIndex();
+            juceParamIndexToRnboParamIndex[juceParamIndex] = i;
+
             apvts.addParameterListener (name, this);
+            rnboObject.setParameterValue (i, apvts.getRawParameterValue (name)->load());
         }
     }
 }
@@ -253,8 +258,8 @@ void JRGranularAudioProcessor::setStateInformation (const void* data, int sizeIn
 
 void JRGranularAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
-    rnboObject.setParameterValue (rnboObject.getParameterIndexForID (parameterID.toRawUTF8()),
-                                  newValue);
+    auto juceParamIndex = apvts.getParameter (parameterID)->getParameterIndex();
+    rnboObject.setParameterValue (juceParamIndexToRnboParamIndex[juceParamIndex], newValue);
 }
 
 void JRGranularAudioProcessor::assureBufferSize (int bufferSize)

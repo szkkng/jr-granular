@@ -83,6 +83,8 @@ private:
     RNBO::SampleValue** inputBuffers;
     RNBO::SampleValue** outputBuffers;
     
+    std::unordered_map<int, RNBO::ParameterIndex> juceParamIndexToRnboParamIndex;
+
     int currentBufferSize { 0 };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JRGranularAudioProcessor)
