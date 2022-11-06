@@ -56,7 +56,7 @@ JRGranularAudioProcessor::JRGranularAudioProcessor()
             auto paramName = juce::String (rnboObject.getParameterName (i));
 
             // Each apvts parameter's name and range must be the same as the rnbo param object's.
-            // If you hit this assertion then you need to fix the incorrect id in ParamNames.h.
+            // If you hit this assertion then you need to fix the incorrect name in ParamNames.h.
             jassert (apvts.getParameter (paramName) != nullptr);  
 
             // If you hit these assertions then you need to fix the incorrect apvts 
