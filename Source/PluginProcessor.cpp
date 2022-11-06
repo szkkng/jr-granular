@@ -46,29 +46,28 @@ JRGranularAudioProcessor::JRGranularAudioProcessor()
     for (RNBO::Index i = 0; i < rnboObject.getNumOutputChannels(); i++)
         outputBuffers[i] = nullptr;
 
-    for (RNBO::Index i = 0; i < rnboObject.getNumParameters(); ++i)
+    for (RNBO::ParameterIndex i = 0; i < rnboObject.getNumParameters(); ++i)
     {
         RNBO::ParameterInfo info;
-        rnboObject.getParameterInfo(i, &info);
+        rnboObject.getParameterInfo (i, &info);
 
         if (info.visible)
         {
-            auto name = juce::String (rnboObject.getParameterName (i));
+            auto paramName = juce::String (rnboObject.getParameterName (i));
 
             // Each apvts parameter's name and range must be the same as the rnbo param object's.
             // If you hit this assertion then you need to fix the incorrect id in ParamIDs.h.
-            jassert (apvts.getParameter (name) != nullptr);  
+            jassert (apvts.getParameter (paramName) != nullptr);  
 
             // If you hit these assertions then you need to fix the incorrect apvts 
             // parameter range in createParameterLayout().
-            jassert (info.min == apvts.getParameter (name)->getNormalisableRange().start);
-            jassert (info.max == apvts.getParameter (name)->getNormalisableRange().end);
+            jassert (info.min == apvts.getParameter (paramName)->getNormalisableRange().start);
+            jassert (info.max == apvts.getParameter (paramName)->getNormalisableRange().end);
 
-            auto juceParamIndex = apvts.getParameter (name)->getParameterIndex();
-            juceParamIndexToRnboParamIndex[juceParamIndex] = i;
+            apvtsParamNameToRnboParamIndex[paramName] = i;
 
-            apvts.addParameterListener (name, this);
-            rnboObject.setParameterValue (i, apvts.getRawParameterValue (name)->load());
+            apvts.addParameterListener (paramName, this);
+            rnboObject.setParameterValue (i, apvts.getRawParameterValue (paramName)->load());
         }
     }
 }
@@ -258,8 +257,7 @@ void JRGranularAudioProcessor::setStateInformation (const void* data, int sizeIn
 
 void JRGranularAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
-    auto juceParamIndex = apvts.getParameter (parameterID)->getParameterIndex();
-    rnboObject.setParameterValue (juceParamIndexToRnboParamIndex[juceParamIndex], newValue);
+    rnboObject.setParameterValue (apvtsParamNameToRnboParamIndex[parameterID], newValue);
 }
 
 void JRGranularAudioProcessor::assureBufferSize (int bufferSize)
