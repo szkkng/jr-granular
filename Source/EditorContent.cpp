@@ -20,17 +20,17 @@
 */
 
 #include "EditorContent.h"
-#include "ParamIDs.h"
+#include "ParamNames.h"
 
 EditorContent::EditorContent (juce::AudioProcessorValueTreeState& apvts,
                               juce::UndoManager& um)
-    : intvDial  (*apvts.getParameter (ParamIDs::interval),  um),
-      pitchDial (*apvts.getParameter (ParamIDs::pitch),     um),
-      sizeDial  (*apvts.getParameter (ParamIDs::grainSize), um),
-      posDial   (*apvts.getParameter (ParamIDs::grainPos),  um),
-      widthDial (*apvts.getParameter (ParamIDs::width),     um),
-      mixDial   (*apvts.getParameter (ParamIDs::mix),       um),
-      gainDial  (*apvts.getParameter (ParamIDs::gain),      um)
+    : intvDial  (*apvts.getParameter (ParamNames::interval),  um),
+      pitchDial (*apvts.getParameter (ParamNames::pitch),     um),
+      sizeDial  (*apvts.getParameter (ParamNames::grainSize), um),
+      posDial   (*apvts.getParameter (ParamNames::grainPos),  um),
+      widthDial (*apvts.getParameter (ParamNames::width),     um),
+      mixDial   (*apvts.getParameter (ParamNames::mix),       um),
+      gainDial  (*apvts.getParameter (ParamNames::gain),      um)
 {
     setWantsKeyboardFocus (true);
 

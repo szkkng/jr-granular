@@ -21,7 +21,7 @@
 
 #pragma once
 
-namespace ParamIDs
+namespace ParamNames
 {
 
     inline constexpr auto mix       { "mix" };
