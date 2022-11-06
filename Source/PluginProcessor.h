@@ -83,7 +83,7 @@ private:
     RNBO::SampleValue** inputBuffers;
     RNBO::SampleValue** outputBuffers;
     
-    std::unordered_map<int, RNBO::ParameterIndex> juceParamIndexToRnboParamIndex;
+    std::unordered_map<juce::String, RNBO::ParameterIndex> apvtsParamNameToRnboParamIndex;
 
     int currentBufferSize { 0 };
 
