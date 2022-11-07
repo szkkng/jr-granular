@@ -15,13 +15,13 @@
         "value": 100
       },
       "mix": {
-        "value": 0.5
+        "value": 50
       },
       "pitch": {
         "value": 0
       },
       "width": {
-        "value": 0.5
+        "value": 50
       }
     }
   }

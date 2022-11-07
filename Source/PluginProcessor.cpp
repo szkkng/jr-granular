@@ -340,9 +340,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout JRGranularAudioProcessor::cr
                                                              msFormat,
                                                              nullptr));
 
-    auto convertToPercent = [](float value, int)
+    auto percentFormat = [](float value, int)
     {
-         value *= 100;
          if (value < 10.0f)
              return juce::String (value, 2) + " %";
          else if (value < 100.0f)
@@ -351,28 +350,23 @@ juce::AudioProcessorValueTreeState::ParameterLayout JRGranularAudioProcessor::cr
              return juce::String (value, 0) + " %"; 
     };
 
-    auto convertFromPercent = [](const juce::String& string)
-    {
-        return string.getFloatValue() * 0.01f;
-    };
-
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamNames::mix, 1 }, 
                                                              ParamNames::mix,
-                                                             juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f, 1.0f),
-                                                             0.5f,
+                                                             juce::NormalisableRange<float> (0.0f, 100.0f, 0.01f, 1.0f),
+                                                             50.0f,
                                                              juce::String(),
                                                              juce::AudioProcessorParameter::genericParameter,
-                                                             convertToPercent,
-                                                             convertFromPercent));
+                                                             percentFormat,
+                                                             nullptr));
 
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamNames::width, 1 }, 
                                                              ParamNames::width,
-                                                             juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f, 1.0f),
-                                                             0.5f,
+                                                             juce::NormalisableRange<float> (0.0f, 100.0f, 0.01f, 1.0f),
+                                                             50.0,
                                                              juce::String(),
                                                              juce::AudioProcessorParameter::genericParameter,
-                                                             convertToPercent,
-                                                             convertFromPercent));
+                                                             percentFormat,
+                                                             nullptr));
 
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamNames::gain, 1 }, 
                                                              ParamNames::gain,

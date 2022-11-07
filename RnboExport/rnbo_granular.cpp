@@ -665,9 +665,9 @@ void getParameterInfo(ParameterIndex index, ParameterInfo * info) const {
         switch (index) {
         case 0:
             info->type = ParameterTypeNumber;
-            info->initialValue = 0.5;
+            info->initialValue = 50;
             info->min = 0;
-            info->max = 1;
+            info->max = 100;
             info->exponent = 1;
             info->steps = 0;
             info->debug = false;
@@ -699,9 +699,9 @@ void getParameterInfo(ParameterIndex index, ParameterInfo * info) const {
             break;
         case 2:
             info->type = ParameterTypeNumber;
-            info->initialValue = 0.5;
+            info->initialValue = 50;
             info->min = 0;
-            info->max = 1;
+            info->max = 100;
             info->exponent = 1;
             info->steps = 0;
             info->debug = false;
@@ -809,8 +809,8 @@ ParameterValue convertToNormalizedParameterValue(ParameterIndex index, Parameter
     case 0:
     case 2:
         {
-            value = (value < 0 ? 0 : (value > 1 ? 1 : value));
-            ParameterValue normalizedValue = (value - 0) / (1 - 0);
+            value = (value < 0 ? 0 : (value > 100 ? 100 : value));
+            ParameterValue normalizedValue = (value - 0) / (100 - 0);
             return normalizedValue;
         }
     case 4:
@@ -848,7 +848,7 @@ ParameterValue convertFromNormalizedParameterValue(ParameterIndex index, Paramet
             value = (value < 0 ? 0 : (value > 1 ? 1 : value));
 
             {
-                return 0 + value * (1 - 0);
+                return 0 + value * (100 - 0);
             }
         }
     case 4:
@@ -978,7 +978,7 @@ void param_01_value_set(number v) {
         this->param_01_lastValue = this->param_01_value;
     }
 
-    this->gen_01_width_set(v);
+    this->expr_02_in1_set(v);
 }
 
 void param_02_value_set(number v) {
@@ -991,7 +991,7 @@ void param_02_value_set(number v) {
         this->param_02_lastValue = this->param_02_value;
     }
 
-    this->expr_01_in1_set(v);
+    this->expr_03_in1_set(v);
 }
 
 void param_03_value_set(number v) {
@@ -1004,7 +1004,7 @@ void param_03_value_set(number v) {
         this->param_03_lastValue = this->param_03_value;
     }
 
-    this->gen_01_mix_set(v);
+    this->expr_01_in1_set(v);
 }
 
 void param_04_value_set(number v) {
@@ -1168,12 +1168,22 @@ void startup() {
 }
 
 static number param_01_value_constrain(number v) {
-    v = (v > 1 ? 1 : (v < 0 ? 0 : v));
+    v = (v > 100 ? 100 : (v < 0 ? 0 : v));
     return v;
 }
 
 void gen_01_width_set(number v) {
     this->gen_01_width = v;
+}
+
+void expr_02_out1_set(number v) {
+    this->expr_02_out1 = v;
+    this->gen_01_width_set(this->expr_02_out1);
+}
+
+void expr_02_in1_set(number in1) {
+    this->expr_02_in1 = in1;
+    this->expr_02_out1_set(this->expr_02_in1 * this->expr_02_in2);//#map:*_obj-21:1
 }
 
 static number param_02_value_constrain(number v) {
@@ -1185,23 +1195,33 @@ void gen_01_gain_set(number v) {
     this->gen_01_gain = v;
 }
 
-void expr_01_out1_set(number v) {
-    this->expr_01_out1 = v;
-    this->gen_01_gain_set(this->expr_01_out1);
+void expr_03_out1_set(number v) {
+    this->expr_03_out1 = v;
+    this->gen_01_gain_set(this->expr_03_out1);
 }
 
-void expr_01_in1_set(number in1) {
-    this->expr_01_in1 = in1;
-    this->expr_01_out1_set(rnbo_pow(10, this->expr_01_in1 * 0.05));//#map:dbtoa_obj-15:1
+void expr_03_in1_set(number in1) {
+    this->expr_03_in1 = in1;
+    this->expr_03_out1_set(rnbo_pow(10, this->expr_03_in1 * 0.05));//#map:dbtoa_obj-15:1
 }
 
 static number param_03_value_constrain(number v) {
-    v = (v > 1 ? 1 : (v < 0 ? 0 : v));
+    v = (v > 100 ? 100 : (v < 0 ? 0 : v));
     return v;
 }
 
 void gen_01_mix_set(number v) {
     this->gen_01_mix = v;
+}
+
+void expr_01_out1_set(number v) {
+    this->expr_01_out1 = v;
+    this->gen_01_mix_set(this->expr_01_out1);
+}
+
+void expr_01_in1_set(number in1) {
+    this->expr_01_in1 = in1;
+    this->expr_01_out1_set(this->expr_01_in1 * this->expr_01_in2);//#map:*_obj-22:1
 }
 
 static number param_04_value_constrain(number v) {
@@ -2047,11 +2067,17 @@ void assign_defaults()
     gen_01_grainPos = 100;
     gen_01_grainSize = 100;
     gen_01_interval = 100;
-    param_01_value = 0.5;
     expr_01_in1 = 0;
+    expr_01_in2 = 0.01;
     expr_01_out1 = 0;
+    expr_02_in1 = 0;
+    expr_02_in2 = 0.01;
+    expr_02_out1 = 0;
+    param_01_value = 50;
+    expr_03_in1 = 0;
+    expr_03_out1 = 0;
     param_02_value = 0;
-    param_03_value = 0.5;
+    param_03_value = 50;
     param_04_value = 0;
     param_05_value = 100;
     param_06_value = 100;
@@ -2118,9 +2144,15 @@ void assign_defaults()
     number gen_01_grainPos;
     number gen_01_grainSize;
     number gen_01_interval;
-    number param_01_value;
     number expr_01_in1;
+    number expr_01_in2;
     number expr_01_out1;
+    number expr_02_in1;
+    number expr_02_in2;
+    number expr_02_out1;
+    number param_01_value;
+    number expr_03_in1;
+    number expr_03_out1;
     number param_02_value;
     number param_03_value;
     number param_04_value;
