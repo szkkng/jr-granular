@@ -61,8 +61,8 @@ JRGranularAudioProcessor::JRGranularAudioProcessor()
 
             // If you hit these assertions then you need to fix the incorrect apvts 
             // parameter range in createParameterLayout().
-            jassert (info.min == apvts.getParameter (paramID)->getNormalisableRange().start);
-            jassert (info.max == apvts.getParameter (paramID)->getNormalisableRange().end);
+            jassert (info.min == apvts.getParameterRange (paramID).start);
+            jassert (info.max == apvts.getParameterRange (paramID).end);
 
             apvtsParamIdToRnboParamIndex[paramID] = i;
 
