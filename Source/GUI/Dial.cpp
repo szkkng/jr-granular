@@ -59,9 +59,9 @@ void Dial::TextBox::editorShown (juce::TextEditor* ed)
     ed->setText (valueShownWithEditor);
 }
 
-Dial::Dial (juce::RangedAudioParameter& param, juce::UndoManager& um)
+Dial::Dial (juce::RangedAudioParameter& param, juce::UndoManager* um)
     : audioParam (param),
-      paramAttachment (audioParam, [&](float v) { updateValue (v); }, &um)
+      paramAttachment (audioParam, [&](float v) { updateValue (v); }, um)
 {
     paramAttachment.sendInitialUpdate();
 

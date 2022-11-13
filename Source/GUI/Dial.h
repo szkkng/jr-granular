@@ -34,7 +34,7 @@ public:
         borderColourId,
     };
 
-    Dial (juce::RangedAudioParameter& param, juce::UndoManager& um);
+    Dial (juce::RangedAudioParameter& param, juce::UndoManager* um = nullptr);
 
     void paint (juce::Graphics& g) override;
     void resized() override;
