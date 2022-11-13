@@ -24,13 +24,13 @@
 
 EditorContent::EditorContent (juce::AudioProcessorValueTreeState& apvts,
                               juce::UndoManager& um)
-    : intvDial  (*apvts.getParameter (ParamIDs::interval),  um),
-      pitchDial (*apvts.getParameter (ParamIDs::pitch),     um),
-      sizeDial  (*apvts.getParameter (ParamIDs::grainSize), um),
-      posDial   (*apvts.getParameter (ParamIDs::grainPos),  um),
-      widthDial (*apvts.getParameter (ParamIDs::width),     um),
-      mixDial   (*apvts.getParameter (ParamIDs::mix),       um),
-      gainDial  (*apvts.getParameter (ParamIDs::gain),      um)
+    : intvDial  (*apvts.getParameter (ParamIDs::interval),  &um),
+      pitchDial (*apvts.getParameter (ParamIDs::pitch),     &um),
+      sizeDial  (*apvts.getParameter (ParamIDs::grainSize), &um),
+      posDial   (*apvts.getParameter (ParamIDs::grainPos),  &um),
+      widthDial (*apvts.getParameter (ParamIDs::width),     &um),
+      mixDial   (*apvts.getParameter (ParamIDs::mix),       &um),
+      gainDial  (*apvts.getParameter (ParamIDs::gain),      &um)
 {
     setWantsKeyboardFocus (true);
 
