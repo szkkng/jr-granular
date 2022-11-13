@@ -57,11 +57,14 @@ EditorContent::EditorContent (juce::AudioProcessorValueTreeState& apvts,
 
 void EditorContent::resized()
 {
-    intvDial.setBounds  (30,  30,  80, 95);
-    pitchDial.setBounds (130, 30,  80, 95);
-    sizeDial.setBounds  (230, 30,  80, 95);
-    posDial.setBounds   (330, 30,  80, 95);
-    widthDial.setBounds (80,  155, 80, 95);
-    mixDial.setBounds   (180, 155, 80, 95);
-    gainDial.setBounds  (280, 155, 80, 95);
+    const auto topDialBounds = juce::Rectangle<int> { 0, 30, 80, 95 };
+    intvDial.setBounds  (topDialBounds.withX (30));
+    pitchDial.setBounds (topDialBounds.withX (130));
+    sizeDial.setBounds  (topDialBounds.withX (230));
+    posDial.setBounds   (topDialBounds.withX (330));
+
+    const auto bottomDialBounds = topDialBounds.withY (155); 
+    widthDial.setBounds (bottomDialBounds.withX (80));
+    mixDial.setBounds   (bottomDialBounds.withX (180));
+    gainDial.setBounds  (bottomDialBounds.withX (280));
 }
