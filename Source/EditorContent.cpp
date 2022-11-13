@@ -34,12 +34,6 @@ EditorContent::EditorContent (juce::AudioProcessorValueTreeState& apvts,
 {
     setWantsKeyboardFocus (true);
 
-    intvDial.setLabelText ("intv");
-    mixDial.setLabelText  ("mix");
-    posDial.setLabelText  ("pos");
-    sizeDial.setLabelText ("size");
-    gainDial.setLabelText ("vol");
-
     // Set interval of values changed by arrow keys or shift + arrow keys.
     intvDial.setInterval (5.0f);
     intvDial.setFineInterval (1.0f);

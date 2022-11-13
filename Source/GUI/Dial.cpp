@@ -80,9 +80,9 @@ Dial::Dial (juce::RangedAudioParameter& param, juce::UndoManager* um)
     startAngle = pi + pi / 6.0f; 
     endAngle   = 3.0f * pi - pi / 6.0f;
 
-    auto paramId = audioParam.getParameterID();
+    auto paramName = audioParam.getName (8);
     setLabelColour (MyColours::grey);
-    label.setText (paramId, juce::NotificationType::dontSendNotification);
+    label.setText (paramName, juce::NotificationType::dontSendNotification);
     label.setJustificationType (juce::Justification::centred);
     label.setInterceptsMouseClicks (false, false);
 
