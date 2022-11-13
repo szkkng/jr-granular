@@ -70,10 +70,10 @@ public:
 
     void parameterChanged (const juce::String& parameterID, float newValue) override;
 
-    void assureBufferSize (int bufferSize);
-
 private:
     //==============================================================================
+    void assureBufferSize (int bufferSize);
+
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
     juce::AudioProcessorValueTreeState apvts;
