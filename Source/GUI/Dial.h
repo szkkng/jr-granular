@@ -69,9 +69,8 @@ private:
 
     juce::Label label;
 
-    class TextBox  : public juce::Label
+    struct TextBox  : public juce::Label
     {
-    public:
         juce::String valueShownWithEditor;
 
         TextBox();
@@ -81,9 +80,6 @@ private:
         juce::TextEditor* createEditorComponent() override;
 
         void editorShown (juce::TextEditor* editor) override;
-
-    private:
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextBox)
     }; 
 
     TextBox textBox;
