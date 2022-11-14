@@ -74,8 +74,6 @@ private:
     //==============================================================================
     void assureBufferSize (int bufferSize);
 
-    juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
-
     juce::AudioProcessorValueTreeState apvts;
     juce::UndoManager undoManager;
 
