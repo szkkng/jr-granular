@@ -72,18 +72,12 @@ public:
 
 private:
     //==============================================================================
-    void assureBufferSize (int bufferSize);
-
     juce::AudioProcessorValueTreeState apvts;
     juce::UndoManager undoManager;
 
     RNBO::CoreObject rnboObject;
-    RNBO::SampleValue** inputBuffers;
-    RNBO::SampleValue** outputBuffers;
-    
-    std::unordered_map<juce::String, RNBO::ParameterIndex> apvtsParamIdToRnboParamIndex;
 
-    int currentBufferSize { 0 };
+    std::unordered_map<juce::String, RNBO::ParameterIndex> apvtsParamIdToRnboParamIndex;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JRGranularAudioProcessor)
 };

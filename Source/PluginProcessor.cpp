@@ -130,15 +130,6 @@ JRGranularAudioProcessor::JRGranularAudioProcessor()
 #endif
        apvts (*this, &undoManager, "Parameters", createParameterLayout())
 {
-    inputBuffers  = new RNBO::SampleValue* [rnboObject.getNumInputChannels()];
-    outputBuffers = new RNBO::SampleValue* [rnboObject.getNumOutputChannels()];
-
-    for (RNBO::Index i = 0; i < rnboObject.getNumInputChannels(); i++)
-        inputBuffers[i] = nullptr;
-
-    for (RNBO::Index i = 0; i < rnboObject.getNumOutputChannels(); i++)
-        outputBuffers[i] = nullptr;
-
     for (RNBO::ParameterIndex i = 0; i < rnboObject.getNumParameters(); ++i)
     {
         RNBO::ParameterInfo info;
@@ -237,7 +228,6 @@ void JRGranularAudioProcessor::changeProgramName (int index, const juce::String&
 //==============================================================================
 void JRGranularAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    assureBufferSize (samplesPerBlock);
     rnboObject.prepareToProcess (sampleRate, static_cast<size_t> (samplesPerBlock));
 }
 
@@ -276,49 +266,16 @@ bool JRGranularAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 void JRGranularAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ignoreUnused (midiMessages);
-    juce::ScopedNoDenormals noDenormals;
+    auto bufferSize = buffer.getNumSamples();
 
-    auto bufferSize = static_cast<size_t> (buffer.getNumSamples());
-    rnboObject.prepareToProcess (getSampleRate(), bufferSize);
+    rnboObject.prepareToProcess (getSampleRate(), 
+                                 static_cast<size_t> (bufferSize));
 
-    auto numInputChannels      = getTotalNumInputChannels();
-    auto numOutputChannels     = getTotalNumOutputChannels();
-    auto rnboNumInputChannels  = static_cast<int> (rnboObject.getNumInputChannels());
-    auto rnboNumOutputChannels = static_cast<int> (rnboObject.getNumInputChannels());
-
-    // Fill input buffers.
-    for (int i = 0; i < rnboNumInputChannels; i++)
-    {
-        if (i < numInputChannels)
-        {
-            for (size_t j = 0; j < bufferSize; j++)
-                inputBuffers[i][j] = buffer.getReadPointer (i)[j];
-        }
-        else
-        {
-            memset (inputBuffers[i], 0, bufferSize * sizeof (double));
-        }
-    }
-
-    rnboObject.process (inputBuffers,
-                        static_cast<RNBO::Index> (rnboNumInputChannels),
-                        outputBuffers,
-                        static_cast<RNBO::Index> (rnboNumOutputChannels),
-                        bufferSize);
-
-    // Fill output buffers.
-    for (int i = 0; i < numOutputChannels; i++)
-    {
-        if (i < rnboNumOutputChannels)
-        {
-            for (size_t j = 0; j < bufferSize; j++)
-                buffer.getWritePointer (i)[j] = static_cast<float> (outputBuffers[i][j]);
-        }
-        else
-        {
-            buffer.clear (i, 0, static_cast<int> (bufferSize));
-        }
-    }
+    rnboObject.process (buffer.getArrayOfWritePointers(),
+                        static_cast<RNBO::Index> (buffer.getNumChannels()),
+                        buffer.getArrayOfWritePointers(),
+                        static_cast<RNBO::Index> (buffer.getNumChannels()),
+                        static_cast<RNBO::Index> (bufferSize));
 }
 
 //==============================================================================
@@ -351,30 +308,6 @@ void JRGranularAudioProcessor::setStateInformation (const void* data, int sizeIn
 void JRGranularAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
     rnboObject.setParameterValue (apvtsParamIdToRnboParamIndex[parameterID], newValue);
-}
-
-void JRGranularAudioProcessor::assureBufferSize (int bufferSize)
-{
-    if (bufferSize > currentBufferSize)
-    {
-        for (RNBO::Index i = 0; i < rnboObject.getNumInputChannels(); i++)
-        {
-            if (inputBuffers[i]) 
-                delete inputBuffers[i];
-
-            inputBuffers[i] = new RNBO::SampleValue[static_cast<size_t> (bufferSize)];
-        }
-
-        for (RNBO::Index i = 0; i < rnboObject.getNumOutputChannels(); i++)
-        {
-            if (outputBuffers[i]) 
-                delete outputBuffers[i];
-
-            outputBuffers[i] = new RNBO::SampleValue[static_cast<size_t> (bufferSize)];
-        }
-
-        currentBufferSize = bufferSize;
-    }
 }
 
 //==============================================================================
