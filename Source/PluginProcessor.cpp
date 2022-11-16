@@ -107,10 +107,10 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
                                                              juce::String(),
                                                              juce::AudioProcessorParameter::genericParameter,
                                                              [](float value, int) {
-                                                             if (value <= -10.0f)
-                                                                return juce::String (std::floorf (value), 0) + " dB";
+                                                             if (-10.0f < value && value < 10.0f)
+                                                                 return juce::String (value, 1) + " dB";
                                                              else
-                                                                 return juce::String (value, 1) + " dB";},
+                                                                 return juce::String (std::roundf (value), 0) + " dB"; },
                                                              nullptr));
 
     return layout;
