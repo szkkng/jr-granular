@@ -6,6 +6,9 @@ This is a real-time granular fx plugin made with JUCE and RNBO C++ export.
 This project is an example of using APVTS (juce::AudioProcessorValueTreeState) to link the exported code with custom JUCE UIs, 
 so I will not add any new features to this plugin.
 
+## Installing
+
+Visit the [Releases](https://github.com/szkkng/jr-granular/releases/) page.
 ## Building
 
 ```
