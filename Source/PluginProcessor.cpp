@@ -254,16 +254,11 @@ bool JRGranularAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 void JRGranularAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ignoreUnused (midiMessages);
-    auto bufferSize = buffer.getNumSamples();
-
-    rnboObject.prepareToProcess (getSampleRate(), 
-                                 static_cast<size_t> (bufferSize));
-
     rnboObject.process (buffer.getArrayOfWritePointers(),
                         static_cast<RNBO::Index> (buffer.getNumChannels()),
                         buffer.getArrayOfWritePointers(),
                         static_cast<RNBO::Index> (buffer.getNumChannels()),
-                        static_cast<RNBO::Index> (bufferSize));
+                        static_cast<RNBO::Index> (buffer.getNumSamples()));
 }
 
 //==============================================================================
