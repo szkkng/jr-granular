@@ -1,7 +1,7 @@
 # JR-Granular
 This is a real-time granular fx plugin made with JUCE and RNBO C++ export. 
 
-![JR-Granular.png](Resources/jr-granular.png)
+<img width="1200" alt="jr-granular" src="https://github.com/szkkng/jr-granular/assets/61953352/4a852f7d-2ecb-4c1f-b614-006cf827b726">
 
 This project is an example of using APVTS (juce::AudioProcessorValueTreeState) to link the exported code with custom JUCE UIs, 
 so I will not add any new features to this plugin.
