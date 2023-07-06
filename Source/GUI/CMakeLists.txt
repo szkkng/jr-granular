@@ -19,5 +19,6 @@
 
 target_sources("${PROJECT_NAME}"
     PRIVATE
+        FuturaMedium.cpp
         Dial.cpp
         EditorLnf.cpp)
