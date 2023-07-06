@@ -59,8 +59,7 @@ add_subdirectory(Source)
 target_sources("${PROJECT_NAME}"
     PRIVATE
         RnboExport/rnbo_granular.cpp
-        RnboExport/rnbo/RNBO.cpp
-        Resources/FuturaMedium.cpp)
+        RnboExport/rnbo/RNBO.cpp)
 
 target_compile_features("${PROJECT_NAME}" PUBLIC cxx_std_20)
 
