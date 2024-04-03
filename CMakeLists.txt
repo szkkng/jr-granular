@@ -26,7 +26,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Build architectures for macOS")
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12" CACHE STRING "Minimum macOS version required")
 
-project("${PROJECT_NAME}" VERSION 1.0.1)
+project("${PROJECT_NAME}" VERSION 1.0.2)
 
 set(formats "VST3" "Standalone")
 
