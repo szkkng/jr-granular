@@ -33,7 +33,13 @@ public:
     void resized() override;
 
 private:
-    Dial intvDial, pitchDial, sizeDial, posDial, widthDial, mixDial, gainDial;
+    Dial intvDial;
+    Dial pitchDial;
+    Dial sizeDial;
+    Dial posDial;
+    Dial widthDial;
+    Dial mixDial;
+    Dial gainDial;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorContent)
 };

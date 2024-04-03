@@ -36,20 +36,20 @@ EditorContent::EditorContent (juce::AudioProcessorValueTreeState& apvts, juce::U
     // Set interval of values changed by arrow keys or shift + arrow keys.
     intvDial.setInterval (5.0f);
     intvDial.setFineInterval (1.0f);
+    pitchDial.setInterval (1.0f);
+    pitchDial.setFineInterval (0.1f);
     sizeDial.setInterval (5.0f);
     sizeDial.setFineInterval (1.0f);
     posDial.setInterval (5.0f);
     posDial.setFineInterval (1.0f);
-    pitchDial.setInterval (1.0f);
-    pitchDial.setFineInterval (0.1f);
     gainDial.setInterval (1.0f);
     gainDial.setFineInterval (0.1f);
 
+    addAndMakeVisible (intvDial);
+    addAndMakeVisible (pitchDial);
     addAndMakeVisible (sizeDial);
     addAndMakeVisible (posDial);
-    addAndMakeVisible (intvDial);
     addAndMakeVisible (widthDial);
-    addAndMakeVisible (pitchDial);
     addAndMakeVisible (mixDial);
     addAndMakeVisible (gainDial);
 }
