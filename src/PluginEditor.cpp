@@ -20,8 +20,8 @@
 */
 
 #include "PluginEditor.h"
-#include "GUI/MyColours.h"
 #include "PluginProcessor.h"
+#include "ui/MyColours.h"
 
 JRGranularAudioProcessorEditor::JRGranularAudioProcessorEditor (JRGranularAudioProcessor& p,
                                                                 juce::AudioProcessorValueTreeState& apvts,

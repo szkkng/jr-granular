@@ -34,7 +34,7 @@ if (APPLE)
     list(APPEND formats "AU")
 endif ()
 
-add_subdirectory(External/JUCE)
+add_subdirectory(lib/JUCE)
 
 juce_add_plugin("${PROJECT_NAME}"
         COMPANY_NAME "Kengo"
@@ -50,18 +50,18 @@ juce_add_plugin("${PROJECT_NAME}"
 juce_generate_juce_header("${PROJECT_NAME}")
 
 include_directories(
-        "${CMAKE_CURRENT_SOURCE_DIR}/RnboExport/rnbo"
-        "${CMAKE_CURRENT_SOURCE_DIR}/RnboExport/rnbo/common")
+        "${CMAKE_CURRENT_SOURCE_DIR}/export/rnbo"
+        "${CMAKE_CURRENT_SOURCE_DIR}/export/rnbo/common")
 
 target_sources("${PROJECT_NAME}" PRIVATE
-        RnboExport/rnbo_granular.cpp
-        RnboExport/rnbo/RNBO.cpp
-        Source/PluginEditor.cpp
-        Source/PluginProcessor.cpp
-        Source/EditorContent.cpp
-        Source/gui/Dial.cpp
-        Source/gui/EditorLnf.cpp
-        Source/gui/FuturaMedium.cpp)
+        export/rnbo_granular.cpp
+        export/rnbo/RNBO.cpp
+        src/PluginEditor.cpp
+        src/PluginProcessor.cpp
+        src/EditorContent.cpp
+        src/ui/Dial.cpp
+        src/ui/EditorLnf.cpp
+        src/ui/FuturaMedium.cpp)
 
 target_compile_features("${PROJECT_NAME}" PUBLIC cxx_std_20)
 
