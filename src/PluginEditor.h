@@ -27,7 +27,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
-class PluginEditor : public juce::AudioProcessorEditor
+class PluginEditor final : public juce::AudioProcessorEditor
 {
 public:
     PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeState& apvts, juce::UndoManager& um);
