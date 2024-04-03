@@ -28,7 +28,7 @@
 //==============================================================================
 /**
 */
-class PluginProcessor
+class PluginProcessor final
     : public juce::AudioProcessor
     , public juce::AudioProcessorValueTreeState::Listener
 {

@@ -25,7 +25,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
-class EditorContent : public juce::Component
+class EditorContent final : public juce::Component
 {
 public:
     EditorContent (juce::AudioProcessorValueTreeState& apvts, juce::UndoManager& um);
