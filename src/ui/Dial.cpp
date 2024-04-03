@@ -22,49 +22,10 @@
 #include "Dial.h"
 #include "MyColours.h"
 
-Dial::TextBox::TextBox()
-{
-    setJustificationType (juce::Justification::centred);
-    setInterceptsMouseClicks (false, false);
-    setColour (juce::Label::outlineWhenEditingColourId, juce::Colours::transparentWhite);
-}
-
-void Dial::TextBox::resized()
-{
-    juce::Label::resized();
-    setFont (getHeight() * 0.8f);
-}
-
-juce::TextEditor* Dial::TextBox::createEditorComponent()
-{
-    auto* ed = juce::Label::createEditorComponent();
-
-    ed->setJustification (juce::Justification::centred);
-    ed->setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentWhite);
-    ed->setColour (juce::CaretComponent::caretColourId, MyColours::red);
-    ed->setInputRestrictions (5, "-0123456789.");
-    ed->setIndents (4, 0);
-    ed->onTextChange = [&]()
-    {
-        auto mms = juce::Desktop::getInstance().getMainMouseSource();
-        mms.hideCursor();
-    };
-
-    return ed;
-}
-
-void Dial::TextBox::editorShown (juce::TextEditor* ed)
-{
-    ed->clear();
-    ed->setText (valueShownWithEditor);
-}
-
 Dial::Dial (juce::RangedAudioParameter& param, juce::UndoManager* um)
     : audioParam (param)
     , paramAttachment (audioParam, [&] (float v) { updateValue (v); }, um)
 {
-    paramAttachment.sendInitialUpdate();
-
     setWantsKeyboardFocus (true);
     setRepaintsOnMouseActivity (true);
     setColour (foregroundArcColourId, MyColours::blue);
@@ -72,43 +33,41 @@ Dial::Dial (juce::RangedAudioParameter& param, juce::UndoManager* um)
     setColour (needleColourId, MyColours::midGrey);
     setColour (borderColourId, MyColours::grey);
 
-    auto range = audioParam.getNormalisableRange();
-    interval = range.getRange().getLength() / 100.0f;
-    fineInterval = interval * 0.1f;
-
-    auto pi = juce::MathConstants<float>::pi;
-    startAngle = pi + pi / 6.0f;
-    endAngle = 3.0f * pi - pi / 6.0f;
-
-    auto paramName = audioParam.getName (8);
     setLabelColour (MyColours::grey);
-    label.setText (paramName, juce::NotificationType::dontSendNotification);
+    label.setText (audioParam.getName (8), juce::NotificationType::dontSendNotification);
     label.setJustificationType (juce::Justification::centred);
     label.setInterceptsMouseClicks (false, false);
 
     setTextBoxColour (MyColours::grey);
-    textBox.onTextChange = [&]()
+    textBox.onTextChange = [&]
     {
-        auto newNormValue = audioParam.getValueForText (textBox.getText());
-        auto newDenormValue = audioParam.convertFrom0to1 (newNormValue);
+        const auto newNormValue = audioParam.getValueForText (textBox.getText());
+        const auto newDenormValue = audioParam.convertFrom0to1 (newNormValue);
         paramAttachment.setValueAsCompleteGesture (newDenormValue);
         textBox.setText (audioParam.getCurrentValueAsText(), juce::NotificationType::dontSendNotification);
     };
 
     addAndMakeVisible (label);
     addAndMakeVisible (textBox);
+
+    paramAttachment.sendInitialUpdate();
 }
 
 void Dial::resized()
 {
     auto bounds = getLocalBounds().toFloat();
 
-    label.setBounds (bounds.removeFromTop (getHeight() / 4.0f).toNearestInt());
-    label.setFont (label.getHeight() * 0.8f);
+    borderPath.clear();
+    createBorder (bounds);
 
-    textBox.setBounds (bounds.removeFromBottom (getHeight() / 4.0f).toNearestInt());
+    const auto subAreaHeight = bounds.getHeight() / 4.0f;
+    label.setBounds (bounds.removeFromTop (subAreaHeight).toNearestInt());
+    textBox.setBounds (bounds.removeFromBottom (subAreaHeight).toNearestInt());
 
-    dialBounds = bounds.expanded (1.0f).withY (bounds.getY() + 1);
+    label.setFont (static_cast<float> (label.getHeight()) * 0.7f);
+    textBox.setFont (static_cast<float> (textBox.getHeight()) * 0.7f);
+
+    mainArea = bounds.expanded (1.0f).withY (bounds.getY() + 1);
 }
 
 void Dial::paint (juce::Graphics& g)
@@ -116,7 +75,7 @@ void Dial::paint (juce::Graphics& g)
     drawDial (g);
 
     if (hasKeyboardFocus (true))
-        drawBorder (g);
+        g.strokePath (borderPath, juce::PathStrokeType { borderThickness });
 }
 
 void Dial::mouseDown (const juce::MouseEvent& e)
@@ -136,7 +95,7 @@ void Dial::mouseDrag (const juce::MouseEvent& e)
         diffY *= 0.1f;
 
     value = juce::jlimit (0.0f, 1.0f, value + diffY);
-    auto newDenormValue = audioParam.convertFrom0to1 (value);
+    const auto newDenormValue = audioParam.convertFrom0to1 (value);
     paramAttachment.setValueAsPartOfGesture (newDenormValue);
     textBox.setText (audioParam.getCurrentValueAsText(), juce::NotificationType::dontSendNotification);
 
@@ -149,18 +108,17 @@ void Dial::mouseUp (const juce::MouseEvent& e)
 
     e.source.enableUnboundedMouseMovement (false);
 
-    auto mms = juce::Desktop::getInstance().getMainMouseSource();
-    mms.setScreenPosition (e.source.getLastMouseDownPosition());
-
-    setMouseCursor (juce::MouseCursor::NormalCursor);
+    juce::Desktop::getInstance().getMainMouseSource().setScreenPosition (e.source.getLastMouseDownPosition());
 }
 
-void Dial::mouseDoubleClick (const juce::MouseEvent& /*e*/)
+void Dial::mouseDoubleClick (const juce::MouseEvent& e)
 {
-    auto defaultValue = audioParam.getDefaultValue();
+    juce::ignoreUnused (e);
+
+    const auto defaultValue = audioParam.getDefaultValue();
     value = defaultValue;
 
-    auto newDenormValue = audioParam.convertFrom0to1 (defaultValue);
+    const auto newDenormValue = audioParam.convertFrom0to1 (defaultValue);
     paramAttachment.setValueAsCompleteGesture (newDenormValue);
 
     textBox.setText (audioParam.getCurrentValueAsText(), juce::NotificationType::dontSendNotification);
@@ -178,11 +136,7 @@ bool Dial::keyPressed (const juce::KeyPress& k)
 
     if (k.getKeyCode() == juce::KeyPress::upKey)
     {
-        auto newValue = getValue() + interval;
-
-        if (k.getModifiers() == juce::ModifierKeys::shiftModifier)
-            newValue = getValue() + fineInterval;
-
+        const auto newValue = getValue() + (k.getModifiers().isShiftDown() ? fineInterval : interval);
         paramAttachment.setValueAsCompleteGesture (newValue);
 
         return true;
@@ -190,17 +144,19 @@ bool Dial::keyPressed (const juce::KeyPress& k)
 
     if (k.getKeyCode() == juce::KeyPress::downKey)
     {
-        auto newValue = getValue() - interval;
-
-        if (k.getModifiers() == juce::ModifierKeys::shiftModifier)
-            newValue = getValue() - fineInterval;
-
+        const auto newValue = getValue() - (k.getModifiers().isShiftDown() ? fineInterval : interval);
         paramAttachment.setValueAsCompleteGesture (newValue);
 
         return true;
     }
 
     return false;
+}
+
+void Dial::focusGained (FocusChangeType cause)
+{
+    juce::ignoreUnused (cause);
+    repaint();
 }
 
 void Dial::focusLost (FocusChangeType cause)
@@ -211,10 +167,6 @@ void Dial::focusLost (FocusChangeType cause)
 
 float Dial::getValue() const { return audioParam.convertFrom0to1 (value); }
 
-void Dial::setInterval (float newInterval) { interval = newInterval; }
-
-void Dial::setFineInterval (float newFineInterval) { fineInterval = newFineInterval; }
-
 void Dial::setTextBoxColour (juce::Colour newColour)
 {
     textBox.setColour (juce::Label::textColourId, newColour);
@@ -223,40 +175,30 @@ void Dial::setTextBoxColour (juce::Colour newColour)
 
 void Dial::setLabelColour (juce::Colour newColour) { label.setColour (juce::Label::textColourId, newColour); }
 
-void Dial::setLabelText (juce::String newLabelText)
+void Dial::setLabelText (const juce::String& newLabelText)
 {
     label.setText (newLabelText, juce::NotificationType::dontSendNotification);
-}
-
-void Dial::setAngle (float startAngleRadians, float endAngleRadians)
-{
-    startAngle = startAngleRadians;
-    endAngle = endAngleRadians;
 }
 
 void Dial::updateValue (float newValue)
 {
     value = audioParam.convertTo0to1 (newValue);
     textBox.setText (audioParam.getCurrentValueAsText(), juce::NotificationType::dontSendNotification);
-
-    if (onValueChange != nullptr)
-        onValueChange();
-
     repaint();
 }
 
 void Dial::drawDial (juce::Graphics& g)
 {
-    auto radius = juce::jmin (dialBounds.getWidth(), dialBounds.getHeight()) / 2.0f;
-    auto toAngle = startAngle + value * (endAngle - startAngle);
-    auto lineWidth = radius * 0.1f;
-    auto arcRadius = radius - lineWidth;
-    auto centre = dialBounds.getCentre();
+    const auto radius = juce::jmin (mainArea.getWidth(), mainArea.getHeight()) * 0.5f;
+    const auto toAngle = startAngle + value * (endAngle - startAngle);
+    const auto lineWidth = radius * 0.1f;
+    const auto arcRadius = radius - lineWidth;
+    const auto centre = mainArea.getCentre();
     auto space = 0.2f;
 
     if (toAngle + space >= endAngle - space)
     {
-        auto restAngle = endAngle - toAngle;
+        const auto restAngle = endAngle - toAngle;
         space *= restAngle / (space * 2.0f);
     }
 
@@ -269,19 +211,17 @@ void Dial::drawDial (juce::Graphics& g)
                                  juce::jlimit (startAngle, endAngle, toAngle + space),
                                  endAngle,
                                  true);
-    auto strokeType = juce::PathStrokeType { lineWidth };
     g.setColour (findColour (backgroundArcColourId));
-    g.strokePath (backgroundArc, strokeType);
+    g.strokePath (backgroundArc, juce::PathStrokeType { lineWidth });
 
     juce::Path valueArc;
     valueArc.addCentredArc (centre.x, centre.y, arcRadius, arcRadius, 0.0f, startAngle, toAngle, true);
-
     g.setColour (findColour (foregroundArcColourId));
-    g.strokePath (valueArc, strokeType);
+    g.strokePath (valueArc, juce::PathStrokeType { lineWidth });
 
     juce::Path needle;
-    auto needleWidth = lineWidth * 1.5f;
-    auto needleLen = radius + lineWidth * 0.3f;
+    const auto needleWidth = lineWidth * 1.5f;
+    const auto needleLen = radius + lineWidth * 0.3f;
     needle.addRoundedRectangle (centre.x - needleWidth * 0.5f,
                                 centre.y + needleWidth * 0.5f - needleLen,
                                 needleWidth,
@@ -291,30 +231,20 @@ void Dial::drawDial (juce::Graphics& g)
     g.fillPath (needle, juce::AffineTransform::rotation (toAngle, centre.x, centre.y));
 }
 
-void Dial::drawBorder (juce::Graphics& g)
+void Dial::createBorder (const juce::Rectangle<float>& bounds)
 {
-    g.setColour (findColour (borderColourId));
-
-    auto thickness = 1.5f;
-    auto bounds = getLocalBounds().toFloat().reduced (thickness * 1.9f);
-    auto length = 4.0f;
-
-    std::array<juce::Point<float>, 4> corners {
-        bounds.getTopLeft(), bounds.getTopRight(), bounds.getBottomRight(), bounds.getBottomLeft()
-    };
+    const auto area = bounds.reduced (borderThickness * 0.5f);
     auto radian = 0.0f;
 
-    // Draw in clockwise order, starting from top left.
-    for (auto corner : corners)
+    for (const auto& corner : { area.getTopLeft(), area.getTopRight(), area.getBottomRight(), area.getBottomLeft() })
     {
-        juce::Path path;
-
-        path.startNewSubPath (corner.x, corner.y + length);
-        path.lineTo (corner);
-        path.lineTo (corner.x + length, corner.y);
-
-        g.strokePath (
-            path, juce::PathStrokeType (thickness), juce::AffineTransform::rotation (radian, corner.x, corner.y));
+        constexpr auto length = 5.0f;
+        juce::Path p;
+        p.startNewSubPath (corner.x, corner.y + length);
+        p.lineTo (corner);
+        p.lineTo (corner.x + length, corner.y);
+        p.applyTransform (juce::AffineTransform::rotation (radian, corner.x, corner.y));
+        borderPath.addPath (p);
 
         radian += juce::MathConstants<float>::halfPi;
     };
