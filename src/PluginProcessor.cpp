@@ -39,7 +39,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
                                                              "intv",
                                                              juce::NormalisableRange { 10.0f, 500.0f, 0.01f, 0.405f },
                                                              100.0f,
-                                                             juce::String(),
+                                                             juce::String {},
                                                              juce::AudioProcessorParameter::genericParameter,
                                                              msFormat,
                                                              nullptr));
@@ -49,7 +49,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
         ParamIDs::pitch,
         juce::NormalisableRange { -12.0f, 12.0f, 0.1f, 1.0f },
         0.0f,
-        juce::String(),
+        juce::String {},
         juce::AudioProcessorParameter::genericParameter,
         [] (float value, int) {
             return juce::String { value, 1 } + " st";
@@ -60,7 +60,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
                                                              "pos",
                                                              juce::NormalisableRange { 10.0f, 500.0f, 1.0f, 0.405f },
                                                              100.0f,
-                                                             juce::String(),
+                                                             juce::String {},
                                                              juce::AudioProcessorParameter::genericParameter,
                                                              msFormat,
                                                              nullptr));
@@ -69,7 +69,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
                                                              "size",
                                                              juce::NormalisableRange { 10.0f, 500.0f, 0.01f, 0.405f },
                                                              100.0f,
-                                                             juce::String(),
+                                                             juce::String {},
                                                              juce::AudioProcessorParameter::genericParameter,
                                                              msFormat,
                                                              nullptr));
@@ -89,7 +89,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
                                                              ParamIDs::mix,
                                                              juce::NormalisableRange { 0.0f, 100.0f, 0.01f, 1.0f },
                                                              50.0f,
-                                                             juce::String(),
+                                                             juce::String {},
                                                              juce::AudioProcessorParameter::genericParameter,
                                                              percentFormat,
                                                              nullptr));
@@ -98,7 +98,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
                                                              ParamIDs::width,
                                                              juce::NormalisableRange { 0.0f, 100.0f, 0.01f, 1.0f },
                                                              50.0,
-                                                             juce::String(),
+                                                             juce::String {},
                                                              juce::AudioProcessorParameter::genericParameter,
                                                              percentFormat,
                                                              nullptr));
@@ -108,7 +108,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
         "vol",
         juce::NormalisableRange { -36.0f, 12.0f, 0.1f, 2.4f },
         0.0f,
-        juce::String(),
+        juce::String {},
         juce::AudioProcessorParameter::genericParameter,
         [] (float value, int)
         {
