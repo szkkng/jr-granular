@@ -27,12 +27,10 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
-class JRGranularAudioProcessorEditor : public juce::AudioProcessorEditor
+class PluginEditor : public juce::AudioProcessorEditor
 {
 public:
-    JRGranularAudioProcessorEditor (JRGranularAudioProcessor& p,
-                                    juce::AudioProcessorValueTreeState& apvts,
-                                    juce::UndoManager& um);
+    PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeState& apvts, juce::UndoManager& um);
 
     void paint (juce::Graphics&) override;
     void resized() override;
@@ -40,8 +38,6 @@ public:
     bool keyPressed (const juce::KeyPress& key) override;
 
 private:
-    JRGranularAudioProcessor& audioProcessor;
-
     juce::UndoManager& undoManager;
 
     EditorContent editorContent;
@@ -59,5 +55,5 @@ private:
 
     juce::SharedResourcePointer<SharedLnf> lnf;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JRGranularAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginEditor)
 };
