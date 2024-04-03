@@ -30,9 +30,9 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
     auto msFormat = [] (float value, int)
     {
         if (value < 100.0f)
-            return juce::String (value, 1) + " ms";
-        else
-            return juce::String (std::roundf (value)) + " ms";
+            return juce::String { std::floor (value * 10.0f) / 10.0f, 1 } + " ms";
+
+        return juce::String { std::floor (value) } + " ms";
     };
 
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamIDs::interval, 1 },
@@ -51,7 +51,9 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
         0.0f,
         juce::String(),
         juce::AudioProcessorParameter::genericParameter,
-        [] (float value, int) { return juce::String (value, 1) + " st"; },
+        [] (float value, int) {
+            return juce::String { value, 1 } + " st";
+        },
         nullptr));
 
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamIDs::grainPos, 1 },
@@ -75,11 +77,12 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
     auto percentFormat = [] (float value, int)
     {
         if (value < 10.0f)
-            return juce::String (value, 2) + " %";
-        else if (value < 100.0f)
-            return juce::String (value, 1) + " %";
-        else
-            return juce::String (value, 0) + " %";
+            return juce::String { value, 2 } + " %";
+
+        if (value < 100.0f)
+            return juce::String { std::floor (value * 10.0f) / 10.0f, 1 } + " %";
+
+        return juce::String { value } + " %";
     };
 
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamIDs::mix, 1 },
@@ -110,9 +113,9 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
         [] (float value, int)
         {
             if (-10.0f < value && value < 10.0f)
-                return juce::String (value, 1) + " dB";
-            else
-                return juce::String (std::roundf (value), 0) + " dB";
+                return juce::String { value, 1 } + " dB";
+
+            return juce::String { std::floor (value) } + " dB";
         },
         nullptr));
 
