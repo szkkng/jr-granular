@@ -32,6 +32,8 @@ public:
 
     void resized() override;
 
+    bool keyPressed (const juce::KeyPress& k) override;
+
 private:
     Dial intvDial;
     Dial pitchDial;
