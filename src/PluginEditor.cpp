@@ -46,20 +46,15 @@ void PluginEditor::resized()
     editorContent.setTransform (juce::AffineTransform::scale (factor));
 }
 
-bool PluginEditor::keyPressed (const juce::KeyPress& key)
+bool PluginEditor::keyPressed (const juce::KeyPress& k)
 {
-    if (const auto cmdZ = juce::KeyPress { 'z', juce::ModifierKeys::commandModifier, 0 };
-        key == cmdZ && undoManager.canUndo())
+    if (k.isKeyCode ('Z') && k.getModifiers().isCommandDown())
     {
-        undoManager.undo();
-        return true;
-    }
+        if (k.getModifiers().isShiftDown())
+            undoManager.redo();
+        else
+            undoManager.undo();
 
-    if (const auto cmdShiftZ =
-            juce::KeyPress { 'z', juce::ModifierKeys::commandModifier | juce::ModifierKeys::shiftModifier, 0 };
-        key == cmdShiftZ && undoManager.canRedo())
-    {
-        undoManager.redo();
         return true;
     }
 
