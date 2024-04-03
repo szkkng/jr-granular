@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "GUI/Dial.h"
+#include "ui/Dial.h"
 #include <JuceHeader.h>
 
 class EditorContent : public juce::Component

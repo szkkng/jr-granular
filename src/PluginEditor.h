@@ -22,7 +22,7 @@
 #pragma once
 
 #include "EditorContent.h"
-#include "GUI/EditorLnf.h"
+#include "ui/EditorLnf.h"
 #include "PluginProcessor.h"
 #include <JuceHeader.h>
 
