@@ -20,7 +20,7 @@
 */
 
 #include "EditorContent.h"
-#include "ParamIDs.h"
+#include "../ParamIDs.h"
 
 EditorContent::EditorContent (juce::AudioProcessorValueTreeState& apvts, juce::UndoManager& um)
     : intvDial (*apvts.getParameter (ParamIDs::interval), &um)

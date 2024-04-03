@@ -56,7 +56,7 @@ target_sources("${PROJECT_NAME}" PRIVATE
         export/rnbo/RNBO.cpp
         src/PluginEditor.cpp
         src/PluginProcessor.cpp
-        src/EditorContent.cpp
+        src/ui/EditorContent.cpp
         src/ui/Dial.cpp
         src/ui/EditorLnf.cpp
         src/ui/FuturaMedium.cpp)
