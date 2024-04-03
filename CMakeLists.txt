@@ -58,8 +58,7 @@ target_sources("${PROJECT_NAME}" PRIVATE
         src/PluginProcessor.cpp
         src/ui/EditorContent.cpp
         src/ui/Dial.cpp
-        src/ui/EditorLnf.cpp
-        src/ui/FuturaMedium.cpp)
+        src/ui/EditorLnf.cpp)
 
 target_compile_features("${PROJECT_NAME}" PUBLIC cxx_std_20)
 
@@ -69,7 +68,11 @@ target_compile_definitions("${PROJECT_NAME}" PUBLIC
         JUCE_USE_CURL=0
         JUCE_VST3_CAN_REPLACE_VST2=0)
 
+juce_add_binary_data(BinaryData SOURCES
+        res/UbuntuRegular.ttf)
+
 target_link_libraries("${PROJECT_NAME}" PRIVATE
+        BinaryData
         juce::juce_audio_utils
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
