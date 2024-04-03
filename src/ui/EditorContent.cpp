@@ -56,7 +56,7 @@ EditorContent::EditorContent (juce::AudioProcessorValueTreeState& apvts, juce::U
 
 void EditorContent::resized()
 {
-    const auto topDialBounds = juce::Rectangle<int> { 0, 30, 80, 95 };
+    const auto topDialBounds = juce::Rectangle { 0, 30, 80, 95 };
     intvDial.setBounds (topDialBounds.withX (30));
     pitchDial.setBounds (topDialBounds.withX (130));
     sizeDial.setBounds (topDialBounds.withX (230));
