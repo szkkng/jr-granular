@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "ui/Dial.h"
+#include "Dial.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
