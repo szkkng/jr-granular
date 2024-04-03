@@ -21,18 +21,18 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-#include "PluginProcessor.h"
-#include "GUI/EditorLnf.h"
 #include "EditorContent.h"
+#include "GUI/EditorLnf.h"
+#include "PluginProcessor.h"
+#include <JuceHeader.h>
 
 //==============================================================================
 /**
 */
-class JRGranularAudioProcessorEditor  : public juce::AudioProcessorEditor
+class JRGranularAudioProcessorEditor : public juce::AudioProcessorEditor
 {
 public:
-    JRGranularAudioProcessorEditor (JRGranularAudioProcessor& p, 
+    JRGranularAudioProcessorEditor (JRGranularAudioProcessor& p,
                                     juce::AudioProcessorValueTreeState& apvts,
                                     juce::UndoManager& um);
     ~JRGranularAudioProcessorEditor() override;
@@ -50,12 +50,12 @@ private:
 
     EditorContent editorContent;
 
-    static constexpr int defaultWidth  { 440 };
+    static constexpr int defaultWidth { 440 };
     static constexpr int defaultHeight { 280 };
 
     struct SharedLnf
     {
-        SharedLnf()  { juce::LookAndFeel::setDefaultLookAndFeel (&editorLnf); }
+        SharedLnf() { juce::LookAndFeel::setDefaultLookAndFeel (&editorLnf); }
         ~SharedLnf() { juce::LookAndFeel::setDefaultLookAndFeel (nullptr); }
 
         EditorLnf editorLnf;

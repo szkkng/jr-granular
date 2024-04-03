@@ -19,38 +19,35 @@
   ==============================================================================
 */
 
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "GUI/MyColours.h"
+#include "PluginProcessor.h"
 
 //==============================================================================
-JRGranularAudioProcessorEditor::JRGranularAudioProcessorEditor (JRGranularAudioProcessor& p, 
+JRGranularAudioProcessorEditor::JRGranularAudioProcessorEditor (JRGranularAudioProcessor& p,
                                                                 juce::AudioProcessorValueTreeState& apvts,
                                                                 juce::UndoManager& um)
-    : AudioProcessorEditor (&p), audioProcessor (p), undoManager (um), editorContent (apvts, um)
+    : AudioProcessorEditor (&p)
+    , audioProcessor (p)
+    , undoManager (um)
+    , editorContent (apvts, um)
 {
     juce::ignoreUnused (audioProcessor);
 
     const auto ratio = static_cast<double> (defaultWidth) / defaultHeight;
     setResizable (false, true);
     getConstrainer()->setFixedAspectRatio (ratio);
-    getConstrainer()->setSizeLimits (defaultWidth / 2, defaultHeight / 2, 
-                                     defaultWidth * 2, defaultHeight * 2);
+    getConstrainer()->setSizeLimits (defaultWidth / 2, defaultHeight / 2, defaultWidth * 2, defaultHeight * 2);
     setSize (defaultWidth, defaultHeight);
     editorContent.setSize (defaultWidth, defaultHeight);
 
     addAndMakeVisible (editorContent);
 }
 
-JRGranularAudioProcessorEditor::~JRGranularAudioProcessorEditor()
-{
-}
+JRGranularAudioProcessorEditor::~JRGranularAudioProcessorEditor() {}
 
 //==============================================================================
-void JRGranularAudioProcessorEditor::paint (juce::Graphics& g)
-{
-    g.fillAll (MyColours::black);
-}
+void JRGranularAudioProcessorEditor::paint (juce::Graphics& g) { g.fillAll (MyColours::black); }
 
 void JRGranularAudioProcessorEditor::resized()
 {
@@ -68,8 +65,8 @@ bool JRGranularAudioProcessorEditor::keyPressed (const juce::KeyPress& key)
         return true;
     }
 
-    const auto cmdShiftZ = juce::KeyPress { 'z', juce::ModifierKeys::commandModifier 
-                                                 | juce::ModifierKeys::shiftModifier, 0 };
+    const auto cmdShiftZ =
+        juce::KeyPress { 'z', juce::ModifierKeys::commandModifier | juce::ModifierKeys::shiftModifier, 0 };
 
     if (key == cmdShiftZ && undoManager.canRedo())
     {

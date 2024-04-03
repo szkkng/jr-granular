@@ -22,15 +22,14 @@
 #include "EditorContent.h"
 #include "ParamIDs.h"
 
-EditorContent::EditorContent (juce::AudioProcessorValueTreeState& apvts,
-                              juce::UndoManager& um)
-    : intvDial  (*apvts.getParameter (ParamIDs::interval),  &um),
-      pitchDial (*apvts.getParameter (ParamIDs::pitch),     &um),
-      sizeDial  (*apvts.getParameter (ParamIDs::grainSize), &um),
-      posDial   (*apvts.getParameter (ParamIDs::grainPos),  &um),
-      widthDial (*apvts.getParameter (ParamIDs::width),     &um),
-      mixDial   (*apvts.getParameter (ParamIDs::mix),       &um),
-      gainDial  (*apvts.getParameter (ParamIDs::gain),      &um)
+EditorContent::EditorContent (juce::AudioProcessorValueTreeState& apvts, juce::UndoManager& um)
+    : intvDial (*apvts.getParameter (ParamIDs::interval), &um)
+    , pitchDial (*apvts.getParameter (ParamIDs::pitch), &um)
+    , sizeDial (*apvts.getParameter (ParamIDs::grainSize), &um)
+    , posDial (*apvts.getParameter (ParamIDs::grainPos), &um)
+    , widthDial (*apvts.getParameter (ParamIDs::width), &um)
+    , mixDial (*apvts.getParameter (ParamIDs::mix), &um)
+    , gainDial (*apvts.getParameter (ParamIDs::gain), &um)
 {
     setWantsKeyboardFocus (true);
 
@@ -58,13 +57,13 @@ EditorContent::EditorContent (juce::AudioProcessorValueTreeState& apvts,
 void EditorContent::resized()
 {
     const auto topDialBounds = juce::Rectangle<int> { 0, 30, 80, 95 };
-    intvDial.setBounds  (topDialBounds.withX (30));
+    intvDial.setBounds (topDialBounds.withX (30));
     pitchDial.setBounds (topDialBounds.withX (130));
-    sizeDial.setBounds  (topDialBounds.withX (230));
-    posDial.setBounds   (topDialBounds.withX (330));
+    sizeDial.setBounds (topDialBounds.withX (230));
+    posDial.setBounds (topDialBounds.withX (330));
 
-    const auto bottomDialBounds = topDialBounds.withY (155); 
+    const auto bottomDialBounds = topDialBounds.withY (155);
     widthDial.setBounds (bottomDialBounds.withX (80));
-    mixDial.setBounds   (bottomDialBounds.withX (180));
-    gainDial.setBounds  (bottomDialBounds.withX (280));
+    mixDial.setBounds (bottomDialBounds.withX (180));
+    gainDial.setBounds (bottomDialBounds.withX (280));
 }

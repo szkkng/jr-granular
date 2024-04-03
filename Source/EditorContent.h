@@ -21,25 +21,18 @@
 
 #pragma once
 
-#include <JuceHeader.h>
 #include "GUI/Dial.h"
+#include <JuceHeader.h>
 
-class EditorContent  : public juce::Component
+class EditorContent : public juce::Component
 {
 public:
-    EditorContent (juce::AudioProcessorValueTreeState& apvts,
-                   juce::UndoManager& um);
+    EditorContent (juce::AudioProcessorValueTreeState& apvts, juce::UndoManager& um);
 
     void resized() override;
 
 private:
-    Dial intvDial,
-         pitchDial,
-         sizeDial,
-         posDial,
-         widthDial,
-         mixDial,
-         gainDial;
+    Dial intvDial, pitchDial, sizeDial, posDial, widthDial, mixDial, gainDial;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorContent)
 };
