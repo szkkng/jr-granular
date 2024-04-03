@@ -23,16 +23,11 @@
 #include "PluginProcessor.h"
 #include "ui/MyColours.h"
 
-JRGranularAudioProcessorEditor::JRGranularAudioProcessorEditor (JRGranularAudioProcessor& p,
-                                                                juce::AudioProcessorValueTreeState& apvts,
-                                                                juce::UndoManager& um)
+PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeState& apvts, juce::UndoManager& um)
     : AudioProcessorEditor (&p)
-    , audioProcessor (p)
     , undoManager (um)
     , editorContent (apvts, um)
 {
-    juce::ignoreUnused (audioProcessor);
-
     constexpr auto ratio = static_cast<double> (defaultWidth) / defaultHeight;
     setResizable (false, true);
     getConstrainer()->setFixedAspectRatio (ratio);
@@ -43,15 +38,15 @@ JRGranularAudioProcessorEditor::JRGranularAudioProcessorEditor (JRGranularAudioP
     addAndMakeVisible (editorContent);
 }
 
-void JRGranularAudioProcessorEditor::paint (juce::Graphics& g) { g.fillAll (MyColours::black); }
+void PluginEditor::paint (juce::Graphics& g) { g.fillAll (MyColours::black); }
 
-void JRGranularAudioProcessorEditor::resized()
+void PluginEditor::resized()
 {
     const auto factor = static_cast<float> (getWidth()) / defaultWidth;
     editorContent.setTransform (juce::AffineTransform::scale (factor));
 }
 
-bool JRGranularAudioProcessorEditor::keyPressed (const juce::KeyPress& key)
+bool PluginEditor::keyPressed (const juce::KeyPress& key)
 {
     if (const auto cmdZ = juce::KeyPress { 'z', juce::ModifierKeys::commandModifier, 0 };
         key == cmdZ && undoManager.canUndo())

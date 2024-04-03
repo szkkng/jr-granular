@@ -119,8 +119,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
     return layout;
 }
 
-//==============================================================================
-JRGranularAudioProcessor::JRGranularAudioProcessor()
+PluginProcessor::PluginProcessor()
     : AudioProcessor (BusesProperties()
                           .withInput ("Input", juce::AudioChannelSet::stereo(), true)
                           .withOutput ("Output", juce::AudioChannelSet::stereo(), true))
@@ -152,12 +151,11 @@ JRGranularAudioProcessor::JRGranularAudioProcessor()
     }
 }
 
-JRGranularAudioProcessor::~JRGranularAudioProcessor() {}
+PluginProcessor::~PluginProcessor() {}
 
-//==============================================================================
-const juce::String JRGranularAudioProcessor::getName() const { return JucePlugin_Name; }
+const juce::String PluginProcessor::getName() const { return JucePlugin_Name; }
 
-bool JRGranularAudioProcessor::acceptsMidi() const
+bool PluginProcessor::acceptsMidi() const
 {
 #if JucePlugin_WantsMidiInput
     return true;
@@ -166,7 +164,7 @@ bool JRGranularAudioProcessor::acceptsMidi() const
 #endif
 }
 
-bool JRGranularAudioProcessor::producesMidi() const
+bool PluginProcessor::producesMidi() const
 {
 #if JucePlugin_ProducesMidiOutput
     return true;
@@ -175,7 +173,7 @@ bool JRGranularAudioProcessor::producesMidi() const
 #endif
 }
 
-bool JRGranularAudioProcessor::isMidiEffect() const
+bool PluginProcessor::isMidiEffect() const
 {
 #if JucePlugin_IsMidiEffect
     return true;
@@ -184,42 +182,41 @@ bool JRGranularAudioProcessor::isMidiEffect() const
 #endif
 }
 
-double JRGranularAudioProcessor::getTailLengthSeconds() const { return 0.0; }
+double PluginProcessor::getTailLengthSeconds() const { return 0.0; }
 
-int JRGranularAudioProcessor::getNumPrograms()
+int PluginProcessor::getNumPrograms()
 {
     return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
         // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int JRGranularAudioProcessor::getCurrentProgram() { return 0; }
+int PluginProcessor::getCurrentProgram() { return 0; }
 
-void JRGranularAudioProcessor::setCurrentProgram (int index) { juce::ignoreUnused (index); }
+void PluginProcessor::setCurrentProgram (int index) { juce::ignoreUnused (index); }
 
-const juce::String JRGranularAudioProcessor::getProgramName (int index)
+const juce::String PluginProcessor::getProgramName (int index)
 {
     juce::ignoreUnused (index);
     return {};
 }
 
-void JRGranularAudioProcessor::changeProgramName (int index, const juce::String& newName)
+void PluginProcessor::changeProgramName (int index, const juce::String& newName)
 {
     juce::ignoreUnused (index, newName);
 }
 
-//==============================================================================
-void JRGranularAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     rnboObject.prepareToProcess (sampleRate, static_cast<size_t> (samplesPerBlock));
 }
 
-void JRGranularAudioProcessor::releaseResources()
+void PluginProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
-bool JRGranularAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool PluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     if (layouts.getMainInputChannelSet() == juce::AudioChannelSet::disabled()
         || layouts.getMainOutputChannelSet() == juce::AudioChannelSet::disabled())
@@ -231,7 +228,7 @@ bool JRGranularAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
     return layouts.getMainInputChannelSet() == layouts.getMainOutputChannelSet();
 }
 
-void JRGranularAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ignoreUnused (midiMessages);
     rnboObject.process (buffer.getArrayOfWritePointers(),
@@ -241,35 +238,29 @@ void JRGranularAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
                         static_cast<RNBO::Index> (buffer.getNumSamples()));
 }
 
-//==============================================================================
-bool JRGranularAudioProcessor::hasEditor() const
+bool PluginProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* JRGranularAudioProcessor::createEditor()
-{
-    return new JRGranularAudioProcessorEditor (*this, apvts, undoManager);
-}
+juce::AudioProcessorEditor* PluginProcessor::createEditor() { return new PluginEditor (*this, apvts, undoManager); }
 
-//==============================================================================
-void JRGranularAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void PluginProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     juce::MemoryOutputStream mos (destData, true);
     apvts.state.writeToStream (mos);
 }
 
-void JRGranularAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     if (const auto tree = juce::ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes)); tree.isValid())
         apvts.replaceState (tree);
 }
 
-void JRGranularAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
+void PluginProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
     rnboObject.setParameterValue (apvtsParamIdToRnboParamIndex[parameterID], newValue);
 }
 
-//==============================================================================
 // This creates new instances of the plugin..
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new JRGranularAudioProcessor(); }
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new PluginProcessor(); }
