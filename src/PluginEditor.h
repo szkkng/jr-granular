@@ -22,9 +22,10 @@
 #pragma once
 
 #include "EditorContent.h"
-#include "ui/EditorLnf.h"
 #include "PluginProcessor.h"
-#include <JuceHeader.h>
+#include "ui/EditorLnf.h"
+#include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 
 class JRGranularAudioProcessorEditor : public juce::AudioProcessorEditor
 {
@@ -56,7 +57,7 @@ private:
         EditorLnf editorLnf;
     };
 
-    SharedResourcePointer<SharedLnf> lnf;
+    juce::SharedResourcePointer<SharedLnf> lnf;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JRGranularAudioProcessorEditor)
 };

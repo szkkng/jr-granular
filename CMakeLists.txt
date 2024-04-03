@@ -47,8 +47,6 @@ juce_add_plugin("${PROJECT_NAME}"
         PRODUCT_NAME "${PROJECT_NAME}"
         PLUGIN_NAME "${PROJECT_NAME}")
 
-juce_generate_juce_header("${PROJECT_NAME}")
-
 include_directories(
         "${CMAKE_CURRENT_SOURCE_DIR}/export/rnbo"
         "${CMAKE_CURRENT_SOURCE_DIR}/export/rnbo/common")
