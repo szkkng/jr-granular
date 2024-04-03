@@ -26,18 +26,13 @@
 #include "PluginProcessor.h"
 #include <JuceHeader.h>
 
-//==============================================================================
-/**
-*/
 class JRGranularAudioProcessorEditor : public juce::AudioProcessorEditor
 {
 public:
     JRGranularAudioProcessorEditor (JRGranularAudioProcessor& p,
                                     juce::AudioProcessorValueTreeState& apvts,
                                     juce::UndoManager& um);
-    ~JRGranularAudioProcessorEditor() override;
 
-    //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
 

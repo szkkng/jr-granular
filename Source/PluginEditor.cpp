@@ -23,7 +23,6 @@
 #include "GUI/MyColours.h"
 #include "PluginProcessor.h"
 
-//==============================================================================
 JRGranularAudioProcessorEditor::JRGranularAudioProcessorEditor (JRGranularAudioProcessor& p,
                                                                 juce::AudioProcessorValueTreeState& apvts,
                                                                 juce::UndoManager& um)
@@ -34,7 +33,7 @@ JRGranularAudioProcessorEditor::JRGranularAudioProcessorEditor (JRGranularAudioP
 {
     juce::ignoreUnused (audioProcessor);
 
-    const auto ratio = static_cast<double> (defaultWidth) / defaultHeight;
+    constexpr auto ratio = static_cast<double> (defaultWidth) / defaultHeight;
     setResizable (false, true);
     getConstrainer()->setFixedAspectRatio (ratio);
     getConstrainer()->setSizeLimits (defaultWidth / 2, defaultHeight / 2, defaultWidth * 2, defaultHeight * 2);
@@ -44,9 +43,6 @@ JRGranularAudioProcessorEditor::JRGranularAudioProcessorEditor (JRGranularAudioP
     addAndMakeVisible (editorContent);
 }
 
-JRGranularAudioProcessorEditor::~JRGranularAudioProcessorEditor() {}
-
-//==============================================================================
 void JRGranularAudioProcessorEditor::paint (juce::Graphics& g) { g.fillAll (MyColours::black); }
 
 void JRGranularAudioProcessorEditor::resized()
@@ -57,18 +53,16 @@ void JRGranularAudioProcessorEditor::resized()
 
 bool JRGranularAudioProcessorEditor::keyPressed (const juce::KeyPress& key)
 {
-    const auto cmdZ = juce::KeyPress { 'z', juce::ModifierKeys::commandModifier, 0 };
-
-    if (key == cmdZ && undoManager.canUndo())
+    if (const auto cmdZ = juce::KeyPress { 'z', juce::ModifierKeys::commandModifier, 0 };
+        key == cmdZ && undoManager.canUndo())
     {
         undoManager.undo();
         return true;
     }
 
-    const auto cmdShiftZ =
-        juce::KeyPress { 'z', juce::ModifierKeys::commandModifier | juce::ModifierKeys::shiftModifier, 0 };
-
-    if (key == cmdShiftZ && undoManager.canRedo())
+    if (const auto cmdShiftZ =
+            juce::KeyPress { 'z', juce::ModifierKeys::commandModifier | juce::ModifierKeys::shiftModifier, 0 };
+        key == cmdShiftZ && undoManager.canRedo())
     {
         undoManager.redo();
         return true;

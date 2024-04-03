@@ -124,18 +124,10 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
 
 //==============================================================================
 JRGranularAudioProcessor::JRGranularAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
     : AudioProcessor (BusesProperties()
-#if ! JucePlugin_IsMidiEffect
-#if ! JucePlugin_IsSynth
                           .withInput ("Input", juce::AudioChannelSet::stereo(), true)
-#endif
-                          .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-#endif
-                          )
-    ,
-#endif
-    apvts (*this, &undoManager, "Parameters", createParameterLayout())
+                          .withOutput ("Output", juce::AudioChannelSet::stereo(), true))
+    , apvts (*this, &undoManager, "Parameters", createParameterLayout())
 {
     for (RNBO::ParameterIndex i = 0; i < rnboObject.getNumParameters(); ++i)
     {
@@ -230,7 +222,6 @@ void JRGranularAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-#ifndef JucePlugin_PreferredChannelConfigurations
 bool JRGranularAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     if (layouts.getMainInputChannelSet() == juce::AudioChannelSet::disabled()
@@ -242,7 +233,6 @@ bool JRGranularAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 
     return layouts.getMainInputChannelSet() == layouts.getMainOutputChannelSet();
 }
-#endif
 
 void JRGranularAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
@@ -263,7 +253,6 @@ bool JRGranularAudioProcessor::hasEditor() const
 juce::AudioProcessorEditor* JRGranularAudioProcessor::createEditor()
 {
     return new JRGranularAudioProcessorEditor (*this, apvts, undoManager);
-    /* return new juce::GenericAudioProcessorEditor (*this); */
 }
 
 //==============================================================================
@@ -275,9 +264,7 @@ void JRGranularAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 
 void JRGranularAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    auto tree = juce::ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes));
-
-    if (tree.isValid())
+    if (const auto tree = juce::ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes)); tree.isValid())
         apvts.replaceState (tree);
 }
 
