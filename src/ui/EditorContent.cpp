@@ -32,6 +32,7 @@ EditorContent::EditorContent (juce::AudioProcessorValueTreeState& apvts, juce::U
     , gainDial (*apvts.getParameter (ParamIDs::gain), &um)
 {
     setWantsKeyboardFocus (true);
+    setFocusContainerType (FocusContainerType::keyboardFocusContainer);
 
     // Set interval of values changed by arrow keys or shift + arrow keys.
     intvDial.setInterval (5.0f);
@@ -66,4 +67,15 @@ void EditorContent::resized()
     widthDial.setBounds (bottomDialBounds.withX (80));
     mixDial.setBounds (bottomDialBounds.withX (180));
     gainDial.setBounds (bottomDialBounds.withX (280));
+}
+
+bool EditorContent::keyPressed (const juce::KeyPress& k)
+{
+    if (k.isKeyCode (juce::KeyPress::tabKey) && hasKeyboardFocus (false))
+    {
+        intvDial.grabKeyboardFocus();
+        return true;
+    }
+
+    return false;
 }
