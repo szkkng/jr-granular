@@ -31,7 +31,6 @@ public:
     EditorContent (juce::AudioProcessorValueTreeState& apvts, juce::UndoManager& um);
 
     void resized() override;
-
     bool keyPressed (const juce::KeyPress& k) override;
 
 private:
