@@ -15,7 +15,7 @@ Visit the [Releases](https://github.com/szkkng/jr-granular/releases/) page.
 ## Building
 
 ```
-$ git clone https://github.com/szkkng/jr-granular.git --recursive
+$ git clone --recurse-submodules https://github.com/szkkng/jr-granular.git
 $ cd jr-granular
 $ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 $ cmake --build build --config Release
