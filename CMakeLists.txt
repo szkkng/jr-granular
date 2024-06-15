@@ -62,7 +62,6 @@ target_sources(jr-granular PRIVATE
 target_compile_features(jr-granular PUBLIC cxx_std_20)
 
 target_compile_definitions(jr-granular PUBLIC
-        JUCE_DISPLAY_SPLASH_SCREEN=0
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
         JUCE_VST3_CAN_REPLACE_VST2=0)
