@@ -20,15 +20,61 @@
 */
 
 #include "PluginProcessor.h"
+#include "juce_audio_processors/juce_audio_processors.h"
+#include "juce_core/juce_core.h"
 #include "ParamIDs.h"
 #include "PluginEditor.h"
 
-namespace ParameterAttributes
+static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
-const auto percentage = juce::AudioParameterFloatAttributes().withStringFromValueFunction (
+    // Format the number to always display three digits like "10.0 ms", "100 ms".
+    const auto ms = [] (auto value, auto)
+    {
+        constexpr auto unit = " ms";
+
+        if (auto v { std::round (value * 10.0f) / 10.0f }; v < 100.0f)
+            return juce::String { v, 1 } + unit;
+
+        return juce::String { std::round (value) } + unit;
+    };
+
+    layout.add (std::make_unique<juce::AudioParameterFloat> (
+        juce::ParameterID { param_ids::interval, 1 },
+        "intv",
+        juce::NormalisableRange { 10.0f, 500.0f, 0.01f, 0.405f },
+        100.0f,
+        juce::AudioParameterFloatAttributes().withStringFromValueFunction (ms)));
+
+    layout.add (
+        std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { param_ids::pitch, 1 },
+                                                     param_ids::pitch,
+                                                     juce::NormalisableRange { -12.0f, 12.0f, 0.1f, 1.0f },
+                                                     0.0f,
+                                                     juce::AudioParameterFloatAttributes().withStringFromValueFunction (
+                                                         [] (auto value, auto)
+                                                         {
+                                                             constexpr auto unit = " st";
+                                                             return juce::String { value, 1 } + unit;
+                                                         })));
+
+    layout.add (std::make_unique<juce::AudioParameterFloat> (
+        juce::ParameterID { param_ids::grainPos, 1 },
+        "pos",
+        juce::NormalisableRange { 10.0f, 500.0f, 1.0f, 0.405f },
+        100.0f,
+        juce::AudioParameterFloatAttributes().withStringFromValueFunction (ms)));
+
+    layout.add (std::make_unique<juce::AudioParameterFloat> (
+        juce::ParameterID { param_ids::grainSize, 1 },
+        "size",
+        juce::NormalisableRange { 10.0f, 500.0f, 0.01f, 0.405f },
+        100.0f,
+        juce::AudioParameterFloatAttributes().withStringFromValueFunction (ms)));
+
     // Format the number to always display three digits like "0.01 %", "10.0 %", "100 %".
-    [] (auto value, auto)
+    const auto percentage = [] (auto value, auto)
     {
         constexpr auto unit = " %";
 
@@ -39,86 +85,38 @@ const auto percentage = juce::AudioParameterFloatAttributes().withStringFromValu
             return juce::String { v, 1 } + unit;
 
         return juce::String { std::round (value) } + unit;
-    });
+    };
 
-const auto ms = juce::AudioParameterFloatAttributes().withStringFromValueFunction (
-    // Format the number to always display three digits like "10.0 ms", "100 ms".
-    [] (auto value, auto)
-    {
-        constexpr auto unit = " ms";
+    layout.add (std::make_unique<juce::AudioParameterFloat> (
+        juce::ParameterID { param_ids::mix, 1 },
+        param_ids::mix,
+        juce::NormalisableRange { 0.0f, 100.0f, 0.01f, 1.0f },
+        50.0f,
+        juce::AudioParameterFloatAttributes().withStringFromValueFunction (percentage)));
 
-        if (auto v { std::round (value * 10.0f) / 10.0f }; v < 100.0f)
-            return juce::String { v, 1 } + unit;
+    layout.add (std::make_unique<juce::AudioParameterFloat> (
+        juce::ParameterID { param_ids::width, 1 },
+        param_ids::width,
+        juce::NormalisableRange { 0.0f, 100.0f, 0.01f, 1.0f },
+        50.0,
+        juce::AudioParameterFloatAttributes().withStringFromValueFunction (percentage)));
 
-        return juce::String { std::round (value) } + unit;
-    });
+    layout.add (std::make_unique<juce::AudioParameterFloat> (
+        juce::ParameterID { param_ids::gain, 1 },
+        "vol",
+        juce::NormalisableRange { -36.0f, 12.0f, 0.1f, 2.4f },
+        0.0f,
+        juce::AudioParameterFloatAttributes().withStringFromValueFunction (
+            [] (auto value, auto)
+            {
+                // Format the number to always display two digits like "0.1 dB", "10 dB".
+                constexpr auto unit = " dB";
 
-const auto db = juce::AudioParameterFloatAttributes().withStringFromValueFunction (
-    // Format the number to always display two digits like "0.1 dB", "10 dB".
-    [] (auto value, auto)
-    {
-        constexpr auto unit = " dB";
+                if (auto v { std::round (value * 10.0f) / 10.0f }; -10.0f < v && v < 10.0f)
+                    return juce::String { v, 1 } + unit;
 
-        if (auto v { std::round (value * 10.0f) / 10.0f }; -10.0f < v && v < 10.0f)
-            return juce::String { v, 1 } + unit;
-
-        return juce::String { std::round (value) } + unit;
-    });
-
-const auto semitone = juce::AudioParameterFloatAttributes().withStringFromValueFunction (
-    [] (auto value, auto)
-    {
-        constexpr auto unit = " st";
-        return juce::String { value, 1 } + unit;
-    });
-
-} // namespace ParameterAttributes
-
-static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
-{
-    juce::AudioProcessorValueTreeState::ParameterLayout layout;
-
-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamIDs::interval, 1 },
-                                                             "intv",
-                                                             juce::NormalisableRange { 10.0f, 500.0f, 0.01f, 0.405f },
-                                                             100.0f,
-                                                             ParameterAttributes::ms));
-
-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamIDs::pitch, 1 },
-                                                             ParamIDs::pitch,
-                                                             juce::NormalisableRange { -12.0f, 12.0f, 0.1f, 1.0f },
-                                                             0.0f,
-                                                             ParameterAttributes::semitone));
-
-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamIDs::grainPos, 1 },
-                                                             "pos",
-                                                             juce::NormalisableRange { 10.0f, 500.0f, 1.0f, 0.405f },
-                                                             100.0f,
-                                                             ParameterAttributes::ms));
-
-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamIDs::grainSize, 1 },
-                                                             "size",
-                                                             juce::NormalisableRange { 10.0f, 500.0f, 0.01f, 0.405f },
-                                                             100.0f,
-                                                             ParameterAttributes::ms));
-
-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamIDs::mix, 1 },
-                                                             ParamIDs::mix,
-                                                             juce::NormalisableRange { 0.0f, 100.0f, 0.01f, 1.0f },
-                                                             50.0f,
-                                                             ParameterAttributes::percentage));
-
-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamIDs::width, 1 },
-                                                             ParamIDs::width,
-                                                             juce::NormalisableRange { 0.0f, 100.0f, 0.01f, 1.0f },
-                                                             50.0,
-                                                             ParameterAttributes::percentage));
-
-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { ParamIDs::gain, 1 },
-                                                             "vol",
-                                                             juce::NormalisableRange { -36.0f, 12.0f, 0.1f, 2.4f },
-                                                             0.0f,
-                                                             ParameterAttributes::db));
+                return juce::String { std::round (value) } + unit;
+            })));
 
     return layout;
 }
@@ -139,13 +137,13 @@ PluginProcessor::PluginProcessor()
             auto paramID = juce::String (rnboObject.getParameterId (i));
 
             // Each apvts parameter id and range must be the same as the rnbo param object's.
-            // If you hit this assertion then you need to fix the incorrect id in ParamIDs.h.
+            // If you hit this assertion then you need to fix the incorrect id in param_ids.h.
             jassert (apvts.getParameter (paramID) != nullptr);
 
             // If you hit these assertions then you need to fix the incorrect apvts
             // parameter range in createParameterLayout().
-            jassert (info.min == apvts.getParameterRange (paramID).start);
-            jassert (info.max == apvts.getParameterRange (paramID).end);
+            jassert (juce::approximatelyEqual (static_cast<float> (info.min), apvts.getParameterRange (paramID).start));
+            jassert (juce::approximatelyEqual (static_cast<float> (info.max), apvts.getParameterRange (paramID).end));
 
             apvtsParamIdToRnboParamIndex[paramID] = i;
 
@@ -154,8 +152,6 @@ PluginProcessor::PluginProcessor()
         }
     }
 }
-
-PluginProcessor::~PluginProcessor() {}
 
 const juce::String PluginProcessor::getName() const { return JucePlugin_Name; }
 
@@ -247,7 +243,10 @@ bool PluginProcessor::hasEditor() const
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* PluginProcessor::createEditor() { return new PluginEditor (*this, apvts, undoManager); }
+juce::AudioProcessorEditor* PluginProcessor::createEditor()
+{
+    return new PluginEditor (*this, apvts, undoManager); // NOLINT
+}
 
 void PluginProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
@@ -267,4 +266,7 @@ void PluginProcessor::parameterChanged (const juce::String& parameterID, float n
 }
 
 // This creates new instances of the plugin..
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new PluginProcessor(); }
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+{
+    return new PluginProcessor(); // NOLINT
+}

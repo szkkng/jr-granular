@@ -21,7 +21,7 @@
 
 #pragma once
 
-namespace ParamIDs
+namespace param_ids
 {
 
 // Be the same value as the "paramId" listed in the rnbo description.json.
