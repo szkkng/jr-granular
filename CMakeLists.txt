@@ -62,3 +62,82 @@ target_link_libraries(
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags
 )
+
+if(APPLE)
+    install(
+        TARGETS
+            ${PROJECT_NAME}_VST3
+        LIBRARY
+            DESTINATION "VST3"
+            COMPONENT VST3
+    )
+    install(
+        TARGETS
+            ${PROJECT_NAME}_AU
+        LIBRARY
+            DESTINATION "Components"
+            COMPONENT AU
+    )
+elseif(WIN32)
+    install(
+        TARGETS
+            ${PROJECT_NAME}_VST3
+        LIBRARY
+            DESTINATION "."
+            COMPONENT VST3
+    )
+endif()
+
+get_target_property(plugin_name jr-granular JUCE_PLUGIN_NAME)
+get_target_property(product_name jr-granular JUCE_PRODUCT_NAME)
+get_target_property(vendor jr-granular JUCE_COMPANY_NAME)
+get_target_property(contact jr-granular JUCE_COMPANY_EMAIL)
+set(CPACK_PACKAGE_NAME "jr-granular")
+set(CPACK_PACKAGE_FILE_NAME ${plugin_name})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "This is ${plugin_name} package.")
+set(CPACK_PACKAGE_VENDOR "${vendor}")
+set(CPACK_PACKAGE_CONTACT "${contact}")
+set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/res/license.txt")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/res/readme.txt")
+set(CPACK_VERBATIM_VARIABLES TRUE)
+
+if(APPLE)
+    set(CPACK_GENERATOR productbuild)
+    set(CPACK_COMPONENTS_ALL
+        "VST3"
+        "AU"
+    )
+    set(CPACK_PACKAGING_INSTALL_PREFIX "/Library/Audio/Plug-Ins")
+    set(CPACK_PRODUCTBUILD_IDENTITY_NAME "Developer ID Installer")
+    set(CPACK_PRODUCTBUILD_RESOURCES_DIR "${CMAKE_SOURCE_DIR}/pkg")
+    set(CPACK_PRODUCTBUILD_BACKGROUND "background-light.png")
+    set(CPACK_PRODUCTBUILD_BACKGROUND_DARKAQUA "background-dark.png")
+    set(CPACK_JUCE_PRODUCT_NAME ${product_name})
+    # CPACK_PRE_BUILD_SCRIPTS or CPACK_POST_BUILD_SCRIPTS continues despite error 
+    # https://gitlab.kitware.com/cmake/cmake/-/issues/26232
+    set(CPACK_PRE_BUILD_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Codesign.cmake")
+    set(CPACK_POST_BUILD_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Notarization.cmake")
+elseif(WIN32)
+    set(CPACK_GENERATOR INNOSETUP)
+    set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_CURRENT_BINARY_DIR};${PROJECT_NAME};VST3;/")
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY ".")
+    set(CPACK_INNOSETUP_INSTALL_ROOT "{commoncf64}/VST3")
+    set(CPACK_INNOSETUP_ARCHITECTURE x64)
+    set(CPACK_INNOSETUP_ALLOW_CUSTOM_DIRECTORY ON)
+    set(CPACK_INNOSETUP_USE_MODERN_WIZARD ON)
+    set(CPACK_INNOSETUP_SETUP_Uninstallable no)
+    set(CPACK_INNOSETUP_SETUP_UsePreviousAppDir no)
+    set(CPACK_INNOSETUP_SETUP_DirExistsWarning no)
+    set(CPACK_INNOSETUP_SETUP_AppendDefaultDirName no)
+endif()
+
+include(CPack)
+
+if(APPLE)
+    cpack_add_component(jr-granular_vst3 DISPLAY_NAME "VST3" DESCRIPTION "VST3 plugin" INSTALL_TYPES full)
+    cpack_add_component(jr-granular_au DISPLAY_NAME "AU" DESCRIPTION "AU plugin" INSTALL_TYPES full)
+    cpack_add_install_type(full)
+endif()
