@@ -21,14 +21,13 @@
 
 #pragma once
 
-#include "MyColours.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 class Dial final : public juce::Component
 {
 public:
-    enum ColourIds
+    enum ColourIds : std::uint8_t
     {
         foregroundArcColourId,
         backgroundArcColourId,
@@ -37,6 +36,7 @@ public:
     };
 
     explicit Dial (juce::RangedAudioParameter& param, juce::UndoManager* um = nullptr);
+    ~Dial() override;
 
     void paint (juce::Graphics& g) override;
     void resized() override;
@@ -76,8 +76,9 @@ private:
     float interval { 1.0f };
     float fineInterval { 0.1f };
 
-    static constexpr auto startAngle { juce::MathConstants<float>::pi + juce::MathConstants<float>::pi / 6.0f };
-    static constexpr auto endAngle { 3.0f * juce::MathConstants<float>::pi - juce::MathConstants<float>::pi / 6.0f };
+    static constexpr auto startAngle { juce::MathConstants<float>::pi + (juce::MathConstants<float>::pi / 6.0f) };
+    static constexpr auto endAngle { (3.0f * juce::MathConstants<float>::pi)
+                                     - (juce::MathConstants<float>::pi / 6.0f) };
 
     juce::Point<float> mousePosWhenLastDragged;
     juce::Rectangle<float> mainArea;
@@ -86,39 +87,8 @@ private:
 
     juce::Label label;
 
-    struct TextBox final : public juce::Label
-    {
-        juce::String valueShownWithEditor {};
-
-        TextBox()
-        {
-            setJustificationType (juce::Justification::centred);
-            setInterceptsMouseClicks (false, false);
-            setColour (juce::Label::outlineWhenEditingColourId, juce::Colours::transparentWhite);
-        }
-
-        juce::TextEditor* createEditorComponent() override
-        {
-            auto* ed = juce::Label::createEditorComponent();
-
-            ed->setJustification (juce::Justification::centred);
-            ed->setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentWhite);
-            ed->setColour (juce::CaretComponent::caretColourId, MyColours::red);
-            ed->setInputRestrictions (5, "-0123456789.");
-            ed->setIndents (4, 1);
-            ed->onTextChange = [] { juce::Desktop::getInstance().getMainMouseSource().hideCursor(); };
-
-            return ed;
-        }
-
-        void editorShown (juce::TextEditor* ed) override
-        {
-            ed->clear();
-            ed->setText (valueShownWithEditor);
-        }
-    };
-
-    TextBox textBox;
+    class TextBox;
+    std::unique_ptr<TextBox> textBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Dial)
 };

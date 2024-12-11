@@ -31,7 +31,7 @@ class PluginProcessor final
 {
 public:
     PluginProcessor();
-    ~PluginProcessor() override;
+    ~PluginProcessor() override = default;
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
