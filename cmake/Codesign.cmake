@@ -1,11 +1,21 @@
-set(vst3_path VST3${CPACK_PACKAGING_INSTALL_PREFIX}/VST3/${CPACK_JUCE_PRODUCT_NAME}.vst3)
-set(au_path AU${CPACK_PACKAGING_INSTALL_PREFIX}/Components/${CPACK_JUCE_PRODUCT_NAME}.component)
+include_guard(GLOBAL)
 
-execute_process(
-    COMMAND
-        codesign -s "Developer ID Application" --force --strict --timestamp --options runtime --verbose ${vst3_path}
-        ${au_path}
-    WORKING_DIRECTORY ${CPACK_TEMPORARY_DIRECTORY}
-    COMMAND_ECHO STDOUT
-    COMMAND_ERROR_IS_FATAL ANY
-)
+function(codesign_plugins TARGET_NAME)
+    if(NOT APPLE)
+        message(STATUS "[apple_codesign] Codesign configuration skipped: This environment is not macOS.")
+        return()
+    endif()
+
+    get_target_property(active_targets ${TARGET_NAME} JUCE_ACTIVE_PLUGIN_TARGETS)
+    foreach(sub_target IN LISTS active_targets)
+        get_target_property(plugin_path ${sub_target} JUCE_PLUGIN_ARTEFACT_FILE)
+        add_custom_command(
+            TARGET ${sub_target}
+            POST_BUILD
+            COMMAND
+                codesign --sign "Developer ID Application" --force --strict --timestamp --options runtime --verbose
+                ${plugin_path}
+            COMMENT "Codesigning target: ${sub_target} at path: ${plugin_path}"
+        )
+    endforeach()
+endfunction()
