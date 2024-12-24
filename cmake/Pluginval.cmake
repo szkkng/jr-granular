@@ -34,15 +34,9 @@ function(add_pluginval_tests TARGET)
     get_target_property(target_path ${TARGET} JUCE_PLUGIN_ARTEFACT_FILE)
     add_test(
         NAME pluginval_${TARGET}
-        COMMAND
-            "${pluginval_executable}" --strictness-level 10 --validate ${target_path}
+        COMMAND "${pluginval_executable}" --strictness-level 10 --validate ${target_path}
     )
-    set_tests_properties(
-        pluginval_${TARGET}
-        PROPERTIES
-            REQUIRED_FILES
-                ${target_path}
-    )
+    set_tests_properties(pluginval_${TARGET} PROPERTIES REQUIRED_FILES ${target_path})
 
     message(STATUS "pluginval tests added for target: ${TARGET}")
 endfunction()
