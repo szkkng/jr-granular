@@ -26,7 +26,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
-set(PRODUCT_NAME "${PROJECT_NAME}")
+set(PRODUCT_NAME "JR-Granular")
 set(TARGET_NAME "${PROJECT_NAME}")
 
 add_subdirectory(lib/JUCE)
@@ -46,13 +46,7 @@ juce_add_plugin(${TARGET_NAME}
 add_subdirectory(export)
 add_subdirectory(src)
 
-target_compile_definitions(
-    ${TARGET_NAME}
-    PUBLIC
-        JUCE_WEB_BROWSER=0
-        JUCE_USE_CURL=0
-        JUCE_VST3_CAN_REPLACE_VST2=0
-)
+target_compile_definitions(${TARGET_NAME} PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
 
 juce_add_binary_data(binary_data SOURCES res/UbuntuRegular.ttf)
 
@@ -78,28 +72,10 @@ if(DEFINED ENV{CI})
 endif()
 
 if(APPLE)
-    install(
-        TARGETS
-            ${TARGET_NAME}_VST3
-        LIBRARY
-            DESTINATION "VST3"
-            COMPONENT VST3
-    )
-    install(
-        TARGETS
-            ${TARGET_NAME}_AU
-        LIBRARY
-            DESTINATION "Components"
-            COMPONENT AU
-    )
+    install(TARGETS ${TARGET_NAME}_VST3 LIBRARY DESTINATION "VST3" COMPONENT VST3)
+    install(TARGETS ${TARGET_NAME}_AU LIBRARY DESTINATION "Components" COMPONENT AU)
 elseif(WIN32)
-    install(
-        TARGETS
-            ${TARGET_NAME}_VST3
-        LIBRARY
-            DESTINATION "."
-            COMPONENT VST3
-    )
+    install(TARGETS ${TARGET_NAME}_VST3 LIBRARY DESTINATION "." COMPONENT VST3)
 endif()
 
 set(PACKAGE_NAME "${PRODUCT_NAME}")
@@ -122,16 +98,12 @@ set(CPACK_VERBATIM_VARIABLES TRUE)
 
 if(APPLE)
     set(CPACK_GENERATOR productbuild)
-    set(CPACK_COMPONENTS_ALL
-        "VST3"
-        "AU"
-    )
+    set(CPACK_COMPONENTS_ALL "VST3" "AU")
     set(CPACK_PACKAGING_INSTALL_PREFIX "/Library/Audio/Plug-Ins")
     set(CPACK_PRODUCTBUILD_IDENTITY_NAME "Developer ID Installer")
     set(CPACK_PRODUCTBUILD_RESOURCES_DIR "${CMAKE_SOURCE_DIR}/res")
     set(CPACK_PRODUCTBUILD_BACKGROUND "background-light.png")
     set(CPACK_PRODUCTBUILD_BACKGROUND_DARKAQUA "background-dark.png")
-    set(CPACK_JUCE_PRODUCT_NAME ${PRODUCT_NAME})
 elseif(WIN32)
     set(CPACK_GENERATOR INNOSETUP)
     set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_CURRENT_BINARY_DIR};${PROJECT_NAME};VST3;/")
