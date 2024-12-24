@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  SCCACHE_GHA_ENABLED: "true"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      - name: Import certificates (macOS)
+        if: runner.os == 'macOS'
+        env:
+          APPLICATION_CERTIFICATE_BASE64: ${{ secrets.APPLICATION_CERTIFICATE_BASE64 }}
+          INSTALLER_CERTIFICATE_BASE64: ${{ secrets.INSTALLER_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          APPLICATION_CERTIFICATE_PATH=$RUNNER_TEMP/application_cert.p12
+          INSTALLER_CERTIFICATE_PATH=$RUNNER_TEMP/installer_cert.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/signing.keychain-db
+
+          echo $APPLICATION_CERTIFICATE_BASE64 | base64 --decode -o $APPLICATION_CERTIFICATE_PATH
+          echo $INSTALLER_CERTIFICATE_BASE64 | base64 --decode -o $INSTALLER_CERTIFICATE_PATH
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          security import $APPLICATION_CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security import $INSTALLER_CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+      - name: Set up MSVC (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install Ninja
+        run: |
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install ninja
+          elif [[ "$RUNNER_OS" == "Windows" ]]; then
+            choco install ninja
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.7
+
+      - name: Configure
+        run: cmake --preset="ci-ninja-multi"
+
+      - name: Build
+        run: cmake --build --preset="ci-ninja-multi-release"
+
+      - name: Test
+        run: ctest --preset="ci-test-release"
+
+      - name: Package
+        run: cpack --preset="ci-package-release"
+
+      - name: Load Environment Variables
+        run: |
+          cat .env.ci
+          cat .env.ci >> $GITHUB_ENV
+
+      - name: Notarization (macOS)
+        if: runner.os == 'macOS'
+        env:
+          DEVELOPER_APPLE_ID: ${{ secrets.DEVELOPER_APPLE_ID }}
+          DEVELOPER_APPLE_PASSWORD: ${{ secrets.DEVELOPER_APPLE_PASSWORD }}
+          DEVELOPER_TEAM_ID: ${{ secrets.DEVELOPER_TEAM_ID }}
+          PACKAGE_DIRECTORY: ${{ env.PACKAGE_DIRECTORY }}
+          PACKAGE_FILE_NAME: ${{ env.PACKAGE_FILE_NAME }}
+        run: xcrun notarytool submit --apple-id $DEVELOPER_APPLE_ID --password $DEVELOPER_APPLE_PASSWORD --team-id $DEVELOPER_TEAM_ID --wait ${PACKAGE_DIRECTORY}/${PACKAGE_FILE_NAME}.pkg
+
+      - name: Azure Trusted Signing (Windows)
+        if: runner.os == 'Windows'
+        uses: azure/trusted-signing-action@v0.5.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
+          files: ${{ env.PACKAGE_DIRECTORY }}/${{ env.PACKAGE_FILE_NAME }}.exe
+
+      - name: "Upload Artifact (macOS)"
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac_${{ env.PRODUCT_NAME }}
+          path: ${{ env.PACKAGE_DIRECTORY }}/${{ env.PACKAGE_FILE_NAME }}.pkg
+          if-no-files-found: error
+
+      - name: "Upload Artifact (Windows)"
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: win_${{ env.PRODUCT_NAME }}
+          path: ${{ env.PACKAGE_DIRECTORY }}\${{ env.PACKAGE_FILE_NAME }}.exe
+          if-no-files-found: error
