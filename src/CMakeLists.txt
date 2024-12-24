@@ -1,7 +1,7 @@
 add_subdirectory(ui)
 
 target_sources(
-    jr-granular
+    ${TARGET_NAME}
     PRIVATE
         PluginEditor.cpp
         PluginProcessor.cpp
