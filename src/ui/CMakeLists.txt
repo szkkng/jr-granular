@@ -1,5 +1,5 @@
 target_sources(
-    jr-granular
+    ${TARGET_NAME}
     PRIVATE
         EditorContent.cpp
         EditorLnf.cpp

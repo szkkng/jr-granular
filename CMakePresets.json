@@ -5,7 +5,11 @@
       "name": "ci-ninja-multi",
       "displayName": "Ninja Multi-Config",
       "generator": "Ninja Multi-Config",
-      "binaryDir": "build"
+      "binaryDir": "build",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER_LAUNCHER": "sccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
+      }
     }
   ],
   "buildPresets": [
@@ -20,51 +24,19 @@
       "configuration": "Release"
     }
   ],
+  "testPresets": [
+    {
+      "name": "ci-test-release",
+      "configurePreset": "ci-ninja-multi",
+      "configuration": "Release"
+    }
+  ],
   "packagePresets": [
     {
       "name": "ci-package-release",
       "configurePreset": "ci-ninja-multi",
-      "environment": {
-        "APPLE_DEVELOPER_ID": "$penv{APPLE_DEVELOPER_ID}",
-        "APPLE_TEAM_ID": "$penv{APPLE_TEAM_ID}",
-        "APPLE_PASSWORD": "$penv{APPLE_PASSWORD}"
-      },
-      "packageDirectory": "${sourceDir}/dist",
-      "configurations": [
-        "Release"
-      ]
+      "configurations": ["Release"]
     }
   ],
-  "workflowPresets": [
-    {
-      "name": "ci-ninja-multi-debug",
-      "steps": [
-        {
-          "type": "configure",
-          "name": "ci-ninja-multi"
-        },
-        {
-          "type": "build",
-          "name": "ci-ninja-multi-debug"
-        }
-      ]
-    },
-    {
-      "name": "ci-ninja-multi-release",
-      "steps": [
-        {
-          "type": "configure",
-          "name": "ci-ninja-multi"
-        },
-        {
-          "type": "build",
-          "name": "ci-ninja-multi-release"
-        },
-        {
-          "type": "package",
-          "name": "ci-package-release"
-        }
-      ]
-    }
-  ]
+  "workflowPresets": []
 }

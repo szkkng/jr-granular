@@ -26,25 +26,28 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+set(PRODUCT_NAME "${PROJECT_NAME}")
+set(TARGET_NAME "${PROJECT_NAME}")
 
 add_subdirectory(lib/JUCE)
 
-juce_add_plugin(jr-granular
+juce_add_plugin(${TARGET_NAME}
     COMPANY_NAME "Kengo"
     COMPANY_WEBSITE "https://kengo.dev"
     COMPANY_EMAIL "hi@kengo.dev"
+    BUNDLE_ID "dev.kengo.${PROJECT_NAME}"
     PLUGIN_MANUFACTURER_CODE "Kngo"
     PLUGIN_CODE "Jrgr"
     FORMATS Standalone VST3 AU
     COPY_PLUGIN_AFTER_BUILD TRUE
-    PRODUCT_NAME "JR-Granular"
+    PRODUCT_NAME "${PRODUCT_NAME}"
 )
 
 add_subdirectory(export)
 add_subdirectory(src)
 
 target_compile_definitions(
-    jr-granular
+    ${TARGET_NAME}
     PUBLIC
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
@@ -54,7 +57,7 @@ target_compile_definitions(
 juce_add_binary_data(binary_data SOURCES res/UbuntuRegular.ttf)
 
 target_link_libraries(
-    jr-granular
+    ${TARGET_NAME}
     PRIVATE
         binary_data
         juce::juce_audio_utils
@@ -63,17 +66,28 @@ target_link_libraries(
         juce::juce_recommended_warning_flags
 )
 
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+enable_testing()
+include(Pluginval)
+add_pluginval_tests(${TARGET_NAME}_VST3)
+
+if(DEFINED ENV{CI})
+    include(Codesign)
+    codesign_plugins(${TARGET_NAME})
+endif()
+
 if(APPLE)
     install(
         TARGETS
-            ${PROJECT_NAME}_VST3
+            ${TARGET_NAME}_VST3
         LIBRARY
             DESTINATION "VST3"
             COMPONENT VST3
     )
     install(
         TARGETS
-            ${PROJECT_NAME}_AU
+            ${TARGET_NAME}_AU
         LIBRARY
             DESTINATION "Components"
             COMPONENT AU
@@ -81,20 +95,22 @@ if(APPLE)
 elseif(WIN32)
     install(
         TARGETS
-            ${PROJECT_NAME}_VST3
+            ${TARGET_NAME}_VST3
         LIBRARY
             DESTINATION "."
             COMPONENT VST3
     )
 endif()
 
-get_target_property(plugin_name jr-granular JUCE_PLUGIN_NAME)
-get_target_property(product_name jr-granular JUCE_PRODUCT_NAME)
-get_target_property(vendor jr-granular JUCE_COMPANY_NAME)
-get_target_property(contact jr-granular JUCE_COMPANY_EMAIL)
-set(CPACK_PACKAGE_NAME "jr-granular")
-set(CPACK_PACKAGE_FILE_NAME ${plugin_name})
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "This is ${plugin_name} package.")
+set(PACKAGE_NAME "${PRODUCT_NAME}")
+set(PACKAGE_DIRECTORY "${CMAKE_SOURCE_DIR}/dist/jr-granular")
+set(PACKAGE_FILE_NAME "${PRODUCT_NAME}")
+get_target_property(vendor ${TARGET_NAME} JUCE_COMPANY_NAME)
+get_target_property(contact ${TARGET_NAME} JUCE_COMPANY_EMAIL)
+set(CPACK_PACKAGE_NAME "${PACKAGE_NAME}")
+set(CPACK_PACKAGE_DIRECTORY "${PACKAGE_DIRECTORY}")
+set(CPACK_PACKAGE_FILE_NAME "${PACKAGE_FILE_NAME}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "This is ${PACKAGE_FILE_NAME} package.")
 set(CPACK_PACKAGE_VENDOR "${vendor}")
 set(CPACK_PACKAGE_CONTACT "${contact}")
 set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
@@ -115,11 +131,7 @@ if(APPLE)
     set(CPACK_PRODUCTBUILD_RESOURCES_DIR "${CMAKE_SOURCE_DIR}/res")
     set(CPACK_PRODUCTBUILD_BACKGROUND "background-light.png")
     set(CPACK_PRODUCTBUILD_BACKGROUND_DARKAQUA "background-dark.png")
-    set(CPACK_JUCE_PRODUCT_NAME ${product_name})
-    # CPACK_PRE_BUILD_SCRIPTS or CPACK_POST_BUILD_SCRIPTS continues despite error 
-    # https://gitlab.kitware.com/cmake/cmake/-/issues/26232
-    set(CPACK_PRE_BUILD_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Codesign.cmake")
-    set(CPACK_POST_BUILD_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Notarization.cmake")
+    set(CPACK_JUCE_PRODUCT_NAME ${PRODUCT_NAME})
 elseif(WIN32)
     set(CPACK_GENERATOR INNOSETUP)
     set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_CURRENT_BINARY_DIR};${PROJECT_NAME};VST3;/")
@@ -137,7 +149,9 @@ endif()
 include(CPack)
 
 if(APPLE)
-    cpack_add_component(jr-granular_vst3 DISPLAY_NAME "VST3" DESCRIPTION "VST3 plugin" INSTALL_TYPES full)
-    cpack_add_component(jr-granular_au DISPLAY_NAME "AU" DESCRIPTION "AU plugin" INSTALL_TYPES full)
+    cpack_add_component(${TARGET_NAME}_VST3 DISPLAY_NAME "VST3" DESCRIPTION "VST3 plugin" INSTALL_TYPES full)
+    cpack_add_component(${TARGET_NAME}_AU DISPLAY_NAME "AU" DESCRIPTION "AU plugin" INSTALL_TYPES full)
     cpack_add_install_type(full)
 endif()
+
+include(CIEnv)
