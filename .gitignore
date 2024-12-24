@@ -2,6 +2,7 @@ build
 .DS_Store
 .cache
 .idea
+.env
 cmake-build-debug
 cmake-build-release
 CMakeUserPresets.json
