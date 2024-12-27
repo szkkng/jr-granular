@@ -130,4 +130,4 @@ if(APPLE)
     cpack_add_install_type(full)
 endif()
 
-include(CIEnv)
+include(EnvCI)
