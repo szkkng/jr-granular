@@ -9,10 +9,18 @@ if(DEFINED ENV{CI})
         endif()
     endforeach()
 
+    set(PACKAGE_FILE_EXT "")
+    if(APPLE)
+        set(PACKAGE_FILE_EXT ".pkg")
+    elseif(WIN32)
+        set(PACKAGE_FILE_EXT ".exe")
+    endif()
+
+    set(PACKAGE_FILE_PATH "${PACKAGE_DIRECTORY}/${PACKAGE_FILE_NAME}${PACKAGE_FILE_EXT}")
     set(env_vars
         "PRODUCT_NAME=${PROJECT_NAME}"
-        "PACKAGE_DIRECTORY=${PACKAGE_DIRECTORY}"
         "PACKAGE_FILE_NAME=${PACKAGE_FILE_NAME}"
+        "PACKAGE_FILE_PATH=${PACKAGE_FILE_PATH}"
         "VERSION=${PROJECT_VERSION}"
     )
 

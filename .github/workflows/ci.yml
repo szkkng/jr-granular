@@ -8,7 +8,6 @@ on:
   workflow_dispatch:
 
 env:
-  BUILD_TYPE: Release
   SCCACHE_GHA_ENABLED: "true"
 
 defaults:
@@ -17,11 +16,10 @@ defaults:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [macos-latest, windows-latest]
-
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Import certificates (macOS)
         if: runner.os == 'macOS'
@@ -31,20 +29,20 @@ jobs:
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          APPLICATION_CERTIFICATE_PATH=$RUNNER_TEMP/application_cert.p12
-          INSTALLER_CERTIFICATE_PATH=$RUNNER_TEMP/installer_cert.p12
-          KEYCHAIN_PATH=$RUNNER_TEMP/signing.keychain-db
+          APPLICATION_CERTIFICATE_PATH="${RUNNER_TEMP}/application_cert.p12"
+          INSTALLER_CERTIFICATE_PATH="${RUNNER_TEMP}/installer_cert.p12"
+          KEYCHAIN_PATH="${RUNNER_TEMP}/signing.keychain-db"
 
-          echo $APPLICATION_CERTIFICATE_BASE64 | base64 --decode -o $APPLICATION_CERTIFICATE_PATH
-          echo $INSTALLER_CERTIFICATE_BASE64 | base64 --decode -o $INSTALLER_CERTIFICATE_PATH
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          echo "$APPLICATION_CERTIFICATE_BASE64" | base64 --decode -o "$APPLICATION_CERTIFICATE_PATH"
+          echo "$INSTALLER_CERTIFICATE_BASE64" | base64 --decode -o "$INSTALLER_CERTIFICATE_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-          security import $APPLICATION_CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security import $INSTALLER_CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
+          security import "$APPLICATION_CERTIFICATE_PATH" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security import "$INSTALLER_CERTIFICATE_PATH" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
 
       - name: Set up MSVC (Windows)
         if: runner.os == 'Windows'
@@ -78,9 +76,10 @@ jobs:
         run: cpack --preset="ci-package-release"
 
       - name: Load Environment Variables
+        id: env-ci
         run: |
           cat .env.ci
-          cat .env.ci >> $GITHUB_ENV
+          cat .env.ci >> "$GITHUB_OUTPUT"
 
       - name: Notarization (macOS)
         if: runner.os == 'macOS'
@@ -88,9 +87,8 @@ jobs:
           DEVELOPER_APPLE_ID: ${{ secrets.DEVELOPER_APPLE_ID }}
           DEVELOPER_APPLE_PASSWORD: ${{ secrets.DEVELOPER_APPLE_PASSWORD }}
           DEVELOPER_TEAM_ID: ${{ secrets.DEVELOPER_TEAM_ID }}
-          PACKAGE_DIRECTORY: ${{ env.PACKAGE_DIRECTORY }}
-          PACKAGE_FILE_NAME: ${{ env.PACKAGE_FILE_NAME }}
-        run: xcrun notarytool submit --apple-id $DEVELOPER_APPLE_ID --password $DEVELOPER_APPLE_PASSWORD --team-id $DEVELOPER_TEAM_ID --wait ${PACKAGE_DIRECTORY}/${PACKAGE_FILE_NAME}.pkg
+          PACKAGE_FILE_PATH: ${{ steps.env-ci.outputs.PACKAGE_FILE_PATH }}
+        run: xcrun notarytool submit --apple-id "$DEVELOPER_APPLE_ID" --password "$DEVELOPER_APPLE_PASSWORD" --team-id "$DEVELOPER_TEAM_ID" --wait "$PACKAGE_FILE_PATH"
 
       - name: Azure Trusted Signing (Windows)
         if: runner.os == 'Windows'
@@ -102,20 +100,11 @@ jobs:
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
           trusted-signing-account-name: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
-          files: ${{ env.PACKAGE_DIRECTORY }}/${{ env.PACKAGE_FILE_NAME }}.exe
+          files: ${{ steps.env-ci.outputs.PACKAGE_FILE_PATH }}
 
-      - name: "Upload Artifact (macOS)"
-        if: runner.os == 'macOS'
+      - name: "Upload Artifact"
         uses: actions/upload-artifact@v4
         with:
-          name: mac_${{ env.PRODUCT_NAME }}
-          path: ${{ env.PACKAGE_DIRECTORY }}/${{ env.PACKAGE_FILE_NAME }}.pkg
-          if-no-files-found: error
-
-      - name: "Upload Artifact (Windows)"
-        if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: win_${{ env.PRODUCT_NAME }}
-          path: ${{ env.PACKAGE_DIRECTORY }}\${{ env.PACKAGE_FILE_NAME }}.exe
+          name: ${{ steps.env-ci.outputs.PACKAGE_FILE_NAME }}
+          path: ${{ steps.env-ci.outputs.PACKAGE_FILE_PATH }}
           if-no-files-found: error
