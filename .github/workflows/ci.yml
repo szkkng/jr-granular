@@ -83,7 +83,9 @@ jobs:
       - name: Load Environment Variables
         id: env-ci
         run: |
+          echo "::group::Show .env.ci"
           cat .env.ci
+          echo "::endgroup::"
           cat .env.ci >> "$GITHUB_OUTPUT"
 
       - name: Notarization (macOS)
