@@ -122,6 +122,8 @@ jobs:
     needs: build
     env:
       VERSION: ${{ github.ref_name }}
+    permissions:
+      contents: write
 
     steps:
       - name: Download Artifacts
