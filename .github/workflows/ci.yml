@@ -130,15 +130,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download Artifacts
-        id: download
         uses: actions/download-artifact@v4
         with:
+          path: artifacts
           merge-multiple: true
 
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOWNLOAD_PATH: ${{ steps.download.outputs.download-path }}
         run: |
           gh release create "$VERSION" --title "$VERSION" --generate-notes
-          gh release upload "$VERSION" "${DOWNLOAD_PATH}/*"
+          gh release upload "$VERSION" artifacts/*
