@@ -1,0 +1,11 @@
+changelog:
+  exclude:
+    authors:
+      - "dependabot"
+  categories:
+    - title: "Enhancements"
+      labels:
+        - "enhancement"
+    - title: "Bug Fixes"
+      labels:
+        - "bug"
