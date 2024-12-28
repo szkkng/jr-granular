@@ -127,6 +127,8 @@ jobs:
       contents: write
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Download Artifacts
         id: download
         uses: actions/download-artifact@v4
