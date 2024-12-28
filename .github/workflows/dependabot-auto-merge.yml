@@ -1,0 +1,23 @@
+name: Dependabot Auto Merge
+
+on: pull_request
+
+jobs:
+  merge:
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: meta
+        uses: dependabot/fetch-metadata@v2
+      - if: >-
+          ${{ steps.meta.outputs.package-ecosystem == 'github_actions' && 
+              steps.meta.outputs.update-type != 'version-update:semver-major' }}
+        run: |
+          gh pr review "$GITHUB_HEAD_REF" --approve
+          gh pr merge "$GITHUB_HEAD_REF" --rebase --auto
