@@ -20,6 +20,7 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     steps:
       - name: Import certificates (macOS)
         if: runner.os == 'macOS'
