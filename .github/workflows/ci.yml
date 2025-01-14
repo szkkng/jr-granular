@@ -96,7 +96,9 @@ jobs:
           DEVELOPER_APPLE_PASSWORD: ${{ secrets.DEVELOPER_APPLE_PASSWORD }}
           DEVELOPER_TEAM_ID: ${{ secrets.DEVELOPER_TEAM_ID }}
           PACKAGE_FILE_PATH: ${{ steps.env-ci.outputs.PACKAGE_FILE_PATH }}
-        run: xcrun notarytool submit --apple-id "$DEVELOPER_APPLE_ID" --password "$DEVELOPER_APPLE_PASSWORD" --team-id "$DEVELOPER_TEAM_ID" --wait "$PACKAGE_FILE_PATH"
+        run: |
+          xcrun notarytool submit --apple-id "$DEVELOPER_APPLE_ID" --password "$DEVELOPER_APPLE_PASSWORD" --team-id "$DEVELOPER_TEAM_ID" --wait "$PACKAGE_FILE_PATH"
+          xcrun stapler staple "$PACKAGE_FILE_PATH"
 
       - name: Azure Trusted Signing (Windows)
         if: runner.os == 'Windows'
