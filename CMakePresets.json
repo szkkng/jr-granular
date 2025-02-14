@@ -10,6 +10,16 @@
         "CMAKE_C_COMPILER_LAUNCHER": "sccache",
         "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
       }
+    },
+    {
+      "name": "ci-msvc",
+      "displayName": "msvc",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "build",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER_LAUNCHER": "sccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
+      }
     }
   ],
   "buildPresets": [
@@ -22,21 +32,90 @@
       "name": "ci-ninja-multi-release",
       "configurePreset": "ci-ninja-multi",
       "configuration": "Release"
+    },
+    {
+      "name": "ci-msvc",
+      "hidden": true,
+      "configurePreset": "ci-msvc",
+      "jobs": 4
+    },
+    {
+      "name": "ci-msvc-debug",
+      "inherits": "ci-msvc",
+      "configuration": "Debug"
+    },
+    {
+      "name": "ci-msvc-release",
+      "inherits": "ci-msvc",
+      "configuration": "Release"
     }
   ],
   "testPresets": [
     {
-      "name": "ci-test-release",
+      "name": "ci-ninja-multi-release",
       "configurePreset": "ci-ninja-multi",
+      "configuration": "Release"
+    },
+    {
+      "name": "ci-msvc-release",
+      "configurePreset": "ci-msvc",
       "configuration": "Release"
     }
   ],
   "packagePresets": [
     {
-      "name": "ci-package-release",
+      "name": "ci-ninja-multi-release",
       "configurePreset": "ci-ninja-multi",
+      "configurations": ["Release"]
+    },
+    {
+      "name": "ci-msvc-release",
+      "configurePreset": "ci-msvc",
       "configurations": ["Release"]
     }
   ],
-  "workflowPresets": []
+  "workflowPresets": [
+    {
+      "name": "ci-ninja-multi-release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-ninja-multi"
+        },
+        {
+          "type": "build",
+          "name": "ci-ninja-multi-release"
+        },
+        {
+          "type": "test",
+          "name": "ci-ninja-multi-release"
+        },
+        {
+          "type": "package",
+          "name": "ci-ninja-multi-release"
+        }
+      ]
+    },
+    {
+      "name": "ci-msvc-release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-msvc"
+        },
+        {
+          "type": "build",
+          "name": "ci-msvc-release"
+        },
+        {
+          "type": "test",
+          "name": "ci-msvc-release"
+        },
+        {
+          "type": "package",
+          "name": "ci-msvc-release"
+        }
+      ]
+    }
+  ]
 }
