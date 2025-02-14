@@ -23,7 +23,17 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        include:
+          - os: macos-latest
+            configure-preset: "ci-ninja-multi"
+            build-preset: "ci-ninja-multi-release"
+            test-preset: "ci-ninja-multi-release"
+            package-preset: "ci-ninja-multi-release"
+          - os: windows-latest
+            configure-preset: "ci-msvc"
+            build-preset: "ci-msvc-release"
+            test-preset: "ci-msvc-release"
+            package-preset: "ci-msvc-release"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
@@ -53,6 +63,8 @@ jobs:
       - name: Set up MSVC (Windows)
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          vsversion: 2022
 
       - name: Install Ninja
         run: |
@@ -70,16 +82,16 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.7
 
       - name: Configure
-        run: cmake --preset="ci-ninja-multi"
+        run: cmake --preset="${{ matrix.configure-preset }}"
 
       - name: Build
-        run: cmake --build --preset="ci-ninja-multi-release"
+        run: cmake --build --preset="${{ matrix.build-preset }}"
 
       - name: Test
-        run: ctest --preset="ci-test-release"
+        run: ctest --preset="${{ matrix.test-preset }}"
 
       - name: Package
-        run: cpack --preset="ci-package-release"
+        run: cpack --preset="${{ matrix.package-preset }}"
 
       - name: Load Environment Variables
         id: env-ci
