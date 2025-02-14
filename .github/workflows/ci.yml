@@ -36,6 +36,7 @@ jobs:
             build-preset: "ci-msvc-release"
             test-preset: "ci-msvc-release"
             package-preset: "ci-msvc-release"
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
