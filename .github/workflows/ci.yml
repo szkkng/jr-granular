@@ -24,12 +24,14 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-latest
+          - name: macOS
+            os: macos-latest
             configure-preset: "ci-ninja-multi"
             build-preset: "ci-ninja-multi-release"
             test-preset: "ci-ninja-multi-release"
             package-preset: "ci-ninja-multi-release"
-          - os: windows-latest
+          - name: Windows
+            os: windows-latest
             configure-preset: "ci-msvc"
             build-preset: "ci-msvc-release"
             test-preset: "ci-msvc-release"
