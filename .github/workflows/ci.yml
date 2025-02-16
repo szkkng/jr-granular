@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  SCCACHE_GHA_ENABLED: "true"
+  SCCACHE_GHA_ENABLED: true
   SCCACHE_CACHE_MULTIARCH: 1
 
 defaults:
@@ -64,19 +64,15 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH"
 
+      - name: Install Ninja (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ninja
+
       - name: Set up MSVC (Windows)
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
         with:
           vsversion: 2022
-
-      - name: Install Ninja
-        run: |
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            brew install ninja
-          elif [[ "$RUNNER_OS" == "Windows" ]]; then
-            choco install ninja
-          fi
 
       - uses: actions/checkout@v4
         with:
