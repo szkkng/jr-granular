@@ -18,13 +18,20 @@
 # ==============================================================================
 
 cmake_minimum_required(VERSION 3.25)
+
+# These variables must be set before the first project() command is called.
+# Additionally, they should be set as cache variables so that their values can be overridden.
+# References:
+# - https://cmake.org/cmake/help/v3.25/variable/CMAKE_OSX_ARCHITECTURES.html
+# - https://cmake.org/cmake/help/v3.25/variable/CMAKE_OSX_DEPLOYMENT_TARGET.html
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Build architectures for macOS")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12" CACHE STRING "Minimum macOS version required")
+
 project(jr-granular VERSION 1.0.4)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(PRODUCT_NAME "JR-Granular")
 set(TARGET_NAME "${PROJECT_NAME}")
