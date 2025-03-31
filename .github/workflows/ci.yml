@@ -79,7 +79,7 @@ jobs:
           submodules: true
 
       - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@65101d47ea8028ed0c98a1cdea8dd9182e9b5133 # v0.0.8
+        uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
 
       - name: Configure
         run: cmake --preset="${{ matrix.configure-preset }}"
