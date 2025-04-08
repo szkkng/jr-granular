@@ -24,20 +24,8 @@ jobs:
   build:
     strategy:
       matrix:
-        include:
-          - name: macOS
-            os: macos-latest
-            configure-preset: "ci-ninja-multi"
-            build-preset: "ci-ninja-multi-release"
-            test-preset: "ci-ninja-multi-release"
-            package-preset: "ci-ninja-multi-release"
-          - name: Windows
-            os: windows-latest
-            configure-preset: "ci-msvc"
-            build-preset: "ci-msvc-release"
-            test-preset: "ci-msvc-release"
-            package-preset: "ci-msvc-release"
-    name: build (${{ matrix.name }})
+        os: [macos-latest, windows-latest]
+    name: build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
@@ -64,10 +52,6 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH"
 
-      - name: Install Ninja (macOS)
-        if: runner.os == 'macOS'
-        run: brew install ninja
-
       - name: Set up MSVC (Windows)
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
@@ -82,16 +66,16 @@ jobs:
         uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
 
       - name: Configure
-        run: cmake --preset="${{ matrix.configure-preset }}"
+        run: cmake --preset "ci-ninja-multi"
 
       - name: Build
-        run: cmake --build --preset="${{ matrix.build-preset }}"
+        run: cmake --build --preset "ci-ninja-multi-release"
 
       - name: Test
-        run: ctest --preset="${{ matrix.test-preset }}"
+        run: ctest --preset "ci-ninja-multi-release"
 
       - name: Package
-        run: cpack --preset="${{ matrix.package-preset }}"
+        run: cpack --preset "ci-ninja-multi-release"
 
       - name: Load Environment Variables
         id: env-ci
