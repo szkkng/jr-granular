@@ -33,7 +33,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
-set(PRODUCT_NAME "JR-Granular")
 set(TARGET_NAME "${PROJECT_NAME}")
 
 set(PLUGIN_FORMATS Standalone VST3 AU Standalone)
@@ -53,7 +52,7 @@ juce_add_plugin(${TARGET_NAME}
     PLUGIN_CODE "Jrgr"
     FORMATS ${PLUGIN_FORMATS}
     COPY_PLUGIN_AFTER_BUILD TRUE
-    PRODUCT_NAME "${PRODUCT_NAME}"
+    PLUGIN_NAME "JR-Granular"
 )
 
 add_subdirectory(export)
@@ -91,12 +90,12 @@ elseif(WIN32)
     install(TARGETS ${TARGET_NAME}_VST3 LIBRARY DESTINATION "." COMPONENT VST3)
 endif()
 
-set(PACKAGE_NAME "${PRODUCT_NAME}")
+set(PACKAGE_NAME "jr-granular")
 set(PACKAGE_DIRECTORY "${CMAKE_SOURCE_DIR}/dist/jr-granular")
 if(APPLE)
-    set(PACKAGE_FILE_NAME "mac_${PRODUCT_NAME}")
+    set(PACKAGE_FILE_NAME "mac_${PACKAGE_NAME}")
 elseif(WIN32)
-    set(PACKAGE_FILE_NAME "win_${PRODUCT_NAME}")
+    set(PACKAGE_FILE_NAME "win_${PACKAGE_NAME}")
 endif()
 get_target_property(vendor ${TARGET_NAME} JUCE_COMPANY_NAME)
 get_target_property(contact ${TARGET_NAME} JUCE_COMPANY_EMAIL)
