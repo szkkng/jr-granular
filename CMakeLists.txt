@@ -36,6 +36,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(PRODUCT_NAME "JR-Granular")
 set(TARGET_NAME "${PROJECT_NAME}")
 
+set(PLUGIN_FORMATS Standalone VST3 AU Standalone)
+
+if(DEFINED ENV{CI})
+    list(REMOVE_ITEM PLUGIN_FORMATS Standalone)
+endif()
+
 add_subdirectory(lib/JUCE)
 
 juce_add_plugin(${TARGET_NAME}
@@ -45,7 +51,7 @@ juce_add_plugin(${TARGET_NAME}
     BUNDLE_ID "dev.kengo.${PROJECT_NAME}"
     PLUGIN_MANUFACTURER_CODE "Kngo"
     PLUGIN_CODE "Jrgr"
-    FORMATS Standalone VST3 AU
+    FORMATS ${PLUGIN_FORMATS}
     COPY_PLUGIN_AFTER_BUILD TRUE
     PRODUCT_NAME "${PRODUCT_NAME}"
 )
