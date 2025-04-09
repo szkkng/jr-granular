@@ -3,6 +3,7 @@ build
 .cache
 .idea
 .env
+.env.ci
 cmake-build-debug
 cmake-build-release
 CMakeUserPresets.json
