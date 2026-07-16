@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - id: meta
-        uses: dependabot/fetch-metadata@08eff52bf64351f401fb50d4972fa95b9f2c2d1b # v2.4.0
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
       - if: >-
           ${{ steps.meta.outputs.package-ecosystem == 'github_actions' && 
               steps.meta.outputs.update-type != 'version-update:semver-major' }}
